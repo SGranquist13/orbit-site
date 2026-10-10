@@ -13,15 +13,15 @@ npm run dev
 
 ## Publish
 
-Live site: https://sgranquist13.github.io/orbit-site/
+Live site: https://enterorbit.dev/
 
 Every push to `main` builds and deploys through `.github/workflows/deploy.yml`. GitHub Pages must use **GitHub Actions** as its source.
 
 To reproduce the production build in PowerShell:
 
 ```powershell
-$env:SITE_URL = 'https://sgranquist13.github.io'
-$env:BASE_PATH = '/orbit-site'
+$env:SITE_URL = 'https://enterorbit.dev'
+$env:BASE_PATH = '/'
 npm run build
 npm run preview
 ```

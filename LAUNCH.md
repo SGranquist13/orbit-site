@@ -2,7 +2,7 @@
 
 Public marketing repository: https://github.com/SGranquist13/orbit-site
 
-Site: https://sgranquist13.github.io/orbit-site/
+Site: https://enterorbit.dev/
 
 Launch updates and feedback: https://github.com/SGranquist13/orbit-site/discussions
 

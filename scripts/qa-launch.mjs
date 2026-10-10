@@ -8,7 +8,7 @@ for (const [width, reducedMotion] of [[1440, 'no-preference'], [390, 'no-prefere
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('response', r => { if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`); });
-  await page.goto('http://127.0.0.1:4321/orbit-site/', { waitUntil: 'networkidle' });
+  await page.goto(process.argv[2] || 'http://127.0.0.1:4321/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
   await page.evaluate(async () => { await Promise.all([...document.images].map(async i => { i.loading = 'eager'; try { await i.decode(); } catch {} })); });
   const result = await page.evaluate(() => ({ overflow: document.documentElement.scrollWidth > innerWidth, brokenImages: [...document.images].filter(i => !i.complete || !i.naturalWidth).length, og: document.querySelector('[property="og:image"]').content, links: [...document.querySelectorAll('a[href^="https"]')].map(a => a.href) }));
@@ -23,4 +23,3 @@ for (const [width, reducedMotion] of [[1440, 'no-preference'], [390, 'no-prefere
 }
 await browser.close();
 if (failed) process.exit(1);
-

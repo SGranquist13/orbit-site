@@ -13,15 +13,15 @@ npm run dev
 
 ## Publish
 
-Live site: https://sgranquist13.github.io/orbit-site/
+Live site: https://enterorbit.dev/
 
 Every push to `main` builds and deploys through `.github/workflows/deploy.yml`. GitHub Pages must use **GitHub Actions** as its source.
 
 To reproduce the production build in PowerShell:
 
 ```powershell
-$env:SITE_URL = 'https://sgranquist13.github.io'
-$env:BASE_PATH = '/orbit-site'
+$env:SITE_URL = 'https://enterorbit.dev'
+$env:BASE_PATH = '/'
 npm run build
 npm run preview
 ```
@@ -37,4 +37,4 @@ Production videos and share artwork are in `public/`; source images used by Astr
 Capture helpers in `scripts/` expect separately running local Orbit desktop (:1420) and mobile web (:8099) apps. `scripts/demo-orbit.mjs` provides simulated demo data. Raw captures and local QA output under `media/` are intentionally excluded from Git.
 
 
-Custom domain: enterorbit.dev is registered and its DNS points to GitHub Pages. The custom domain attachment was rolled back because GitHub had not issued its HTTPS certificate. The public GitHub Pages address remains the working launch URL.
+Custom domain: enterorbit.dev is connected to GitHub Pages with HTTPS enforced. Both the apex and www names are covered by the certificate.

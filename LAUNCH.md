@@ -2,7 +2,7 @@
 
 Public marketing repository: https://github.com/SGranquist13/orbit-site
 
-Site: https://sgranquist13.github.io/orbit-site/
+Site: https://enterorbit.dev/
 
 Launch updates and feedback: https://github.com/SGranquist13/orbit-site/discussions
 
@@ -13,4 +13,4 @@ Push to `main` to deploy through GitHub Actions. See README.md for local develop
 Share artwork is in `social/`; the site's link-preview image is `public/og.png`.
 
 
-Custom domain enterorbit.dev is pending a successful HTTPS cutover; it is not currently attached to Pages. Do not share it as the live site yet.
+Custom domain enterorbit.dev is connected, with HTTPS enforced. GitHub provisions and renews its certificate.

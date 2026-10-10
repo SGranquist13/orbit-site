@@ -1,0 +1,50 @@
+---
+import "../styles/global.css";
+import { asset } from "../lib/url";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = "Orbit — Run a fleet of coding agents",
+  description = "Orbit is a desktop IDE for Claude Code and Codex. Every task gets its own worktree, branch, and agent, so ten things can move at once without stepping on each other.",
+} = Astro.props;
+const canonical = Astro.site ? new URL(asset(""), Astro.site).href : undefined;
+const ogImage = Astro.site ? new URL(asset("og.png"), Astro.site).href : asset("og.png");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#050506" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" type="image/png" href={asset("favicon.png")} />
+    <link rel="apple-touch-icon" href={asset("apple-touch-icon.png")} />
+    <script is:inline>
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>
+    <slot />
+    <script>
+      import "../scripts/motion.ts";
+    </script>
+  </body>
+</html>

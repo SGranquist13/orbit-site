@@ -1,0 +1,39 @@
+---
+import { Image } from "astro:assets";
+import mark from "../assets/brand/app-icon-desktop.png";
+import { GITHUB_URL, UPDATES_URL } from "../config";
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="dither-rule"></div>
+    <div class="row">
+      <a href="#top" class="brand" aria-label="Orbit home">
+        <Image src={mark} alt="" width={24} height={24} densities={[1, 2]} format="png" class="mark" />
+        <span>orbit</span>
+      </a>
+      <p class="by">Built by Steven Granquist</p>
+      <nav class="links" aria-label="Footer">
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href={UPDATES_URL} target="_blank" rel="noopener noreferrer">Launch updates</a>
+      </nav>
+      <p class="copy">© 2026</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { padding-bottom: 40px; position: relative; z-index: 2; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; padding-top: 32px; font-size: 14px; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--fg); font-weight: 600; font-size: 18px; letter-spacing: -0.03em; }
+  .brand :global(.mark) { width: 24px; height: 24px; border-radius: 6px; mix-blend-mode: lighten; }
+  .by, .copy { margin: 0; color: var(--mute); }
+  .links { display: flex; gap: 24px; margin-left: auto; }
+  .links a { color: var(--dim); transition: color .15s; }
+  .links a:hover { color: var(--fg); }
+  @media (max-width: 639px) {
+    .row { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .links { margin-left: 0; }
+  }
+</style>
+

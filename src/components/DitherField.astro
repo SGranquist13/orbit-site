@@ -1,0 +1,35 @@
+---
+/** Canvas Bayer 8x8 radial glow, painted client-side by src/scripts/dither.ts. Absolutely fills its parent. */
+interface Props {
+  cell?: number;
+  strength?: number;
+  power?: number;
+  variant?: "glow" | "horizon";
+  hi?: "mute" | "dim";
+  class?: string;
+  [key: string]: unknown;
+}
+const { cell = 3, strength = 0.9, power = 1.6, variant = "glow", hi = "mute", class: className = "", ...rest } = Astro.props;
+---
+
+<canvas
+  data-dither-field
+  data-cell={cell}
+  data-strength={strength}
+  data-power={power}
+  data-variant={variant}
+  data-hi={hi}
+  aria-hidden="true"
+  class:list={["dither-field", className]}
+  {...rest}></canvas>
+
+<style>
+  .dither-field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+</style>

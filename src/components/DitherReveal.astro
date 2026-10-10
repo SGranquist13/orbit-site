@@ -1,0 +1,14 @@
+---
+/** Bayer 8x8 threshold reveal (spec motion 6). trigger="load" runs on page load, "view" on scroll enter. */
+interface Props {
+  trigger?: "load" | "view";
+  cell?: number;
+  delay?: number;
+  class?: string;
+}
+const { trigger = "view", cell = 4, delay = 0, class: className = "" } = Astro.props;
+---
+
+<div data-dither-reveal data-trigger={trigger} data-cell={cell} data-delay={delay} class:list={["dither-reveal", className]}>
+  <slot />
+</div>

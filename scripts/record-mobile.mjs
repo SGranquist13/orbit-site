@@ -1,0 +1,37 @@
+// Records a real Orbit Mobile flow (expo web :8099 + in-process demo fleet) via CDP screencast.
+import { chromium } from "playwright";
+import fs from "node:fs";
+import { execFileSync } from "node:child_process";
+import { startMockOrbit } from "./demo-orbit.mjs";
+const mock = await startMockOrbit({ port: 47823, hosts: ["studio.localhost"], name: "Studio", stepMs: 420 });
+const dir = "media/frames-mobile"; fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, colorScheme: "dark" });
+const page = await ctx.newPage();
+const w = (ms) => page.waitForTimeout(ms);
+await page.goto("http://localhost:8099"); await w(5000);
+await page.getByText("Enter pairing code").first().click(); await w(600);
+await page.locator("textarea").fill(mock.uri()); await page.getByText("Connect", { exact: true }).click(); await w(4000);
+const cdp = await ctx.newCDPSession(page);
+const frames = [];
+cdp.on("Page.screencastFrame", async (f) => {
+  fs.writeFileSync(`${dir}/${String(frames.length).padStart(5, "0")}.jpg`, Buffer.from(f.data, "base64"));
+  frames.push(f.metadata.timestamp); await cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
+});
+await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: 1170, maxHeight: 2532 });
+await w(1500);
+await page.getByText("Fix onboarding crash").first().tap(); await w(2200);
+const box = page.locator("textarea").last();
+await box.tap(); await w(300); await box.pressSequentially("Ship it", { delay: 120 }); await w(500);
+await page.keyboard.press("Enter"); await w(400);
+const send = page.getByRole("button").last(); await send.tap().catch(() => {}); await w(6500);
+await page.getByText(/^Files/).first().tap(); await w(1500);
+await page.getByText("submit.ts", { exact: true }).first().tap(); await w(2500);
+await cdp.send("Page.stopScreencast");
+await browser.close(); await mock.close();
+const lines = frames.map((t, i) => `file '${String(i).padStart(5, "0")}.jpg'\nduration ${((frames[i + 1] ?? t + 0.5) - t).toFixed(4)}`);
+fs.writeFileSync(`${dir}/list.txt`, lines.join("\n") + `\nfile '${String(frames.length - 1).padStart(5, "0")}.jpg'\n`);
+const vf = "fps=30,scale=780:-2:flags=lanczos,format=yuv420p";
+execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libx264", "-crf", "20", "-preset", "slow", "-movflags", "+faststart", "-an", "media/mobile-tour.mp4"]);
+execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libvpx-vp9", "-crf", "34", "-b:v", "0", "-an", "media/mobile-tour.webm"]);
+console.log(frames.length, "frames -> media/mobile-tour.mp4/.webm");

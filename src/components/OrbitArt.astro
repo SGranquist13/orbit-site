@@ -1,0 +1,55 @@
+---
+import { Image } from "astro:assets";
+import art from "../assets/brand/orbit-art.png";
+
+/** Black hole + orbiting planet. Planet motion lives in src/scripts/orbit.ts. */
+interface Props { size?: number | string; class?: string }
+const { size = 520, class: className = "" } = Astro.props;
+const px = typeof size === "number" ? `${size}px` : size;
+
+// Geometry, fractions of the art size (see OrbitHero.tsx).
+const CENTER = { x: 0.52, y: 0.475 };
+const HORIZON_R = 0.13;
+const ORBIT = { rx: 0.44, ry: 0.11, tilt: -15 };
+const PLANET = 0.05;
+const pct = (n: number) => `${n * 100}%`;
+---
+
+<div data-orbit class:list={["orbit-art", className]} style={`--size:${px}`} aria-hidden="true">
+  <svg class="orbit-path" viewBox="0 0 1000 1000">
+    <ellipse
+      cx={CENTER.x * 1000}
+      cy={CENTER.y * 1000}
+      rx={ORBIT.rx * 1000}
+      ry={ORBIT.ry * 1000}
+      transform={`rotate(${ORBIT.tilt} ${CENTER.x * 1000} ${CENTER.y * 1000})`}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-dasharray="1.5 6"
+      vector-effect="non-scaling-stroke"></ellipse>
+  </svg>
+  <span data-orbit-planet class="planet" style={`width:${pct(PLANET)};height:${pct(PLANET)};left:${pct(CENTER.x + ORBIT.rx)};top:${pct(CENTER.y)}`}>
+    <span class="dither-50 shade" style="transform:translate(38%,30%)"></span>
+    <span class="shade solid" style="transform:translate(58%,48%)"></span>
+  </span>
+  <span
+    class="horizon"
+    style={`left:${pct(CENTER.x - HORIZON_R)};top:${pct(CENTER.y - HORIZON_R)};width:${pct(HORIZON_R * 2)};height:${pct(HORIZON_R * 2)}`}
+  ></span>
+  <Image src={art} alt="" format="png" widths={[520, 1040]} sizes="(min-width: 640px) 520px, 80vw" class="art" draggable="false" />
+</div>
+
+<style>
+  .orbit-art { position: relative; width: var(--size); aspect-ratio: 1; max-width: 100%; pointer-events: none; }
+  .orbit-path { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--line-strong); z-index: 0; overflow: visible; }
+  .planet {
+    position: absolute; display: block; overflow: hidden; border-radius: 9999px; background: var(--fg);
+    transform: translate(-50%, -50%); z-index: 4;
+  }
+  .shade { position: absolute; inset: 0; border-radius: 9999px; }
+  .solid { background: var(--bg); }
+  .horizon { position: absolute; z-index: 2; border-radius: 9999px; background: var(--bg); }
+  /* The art is opaque black; lighten lets only its bright pixels through. */
+  .art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; mix-blend-mode: lighten; user-select: none; }
+</style>

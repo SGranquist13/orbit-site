@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: Inter; src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: JBM; src: url("../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+  :root { --bg:#050506; --fg:#ececef; --dim:#a2a2aa; --mute:#63636c; --ls:#34343b; }
+  * { margin:0; box-sizing:border-box; }
+  html,body { width:var(--w); height:var(--h); background:var(--bg); overflow:hidden; font-family:Inter; color:var(--fg); -webkit-font-smoothing:antialiased; }
+  .stage { position:relative; width:100%; height:100%; }
+  canvas#dither { position:absolute; inset:0; image-rendering:pixelated; }
+  .brand { position:absolute; display:flex; align-items:center; gap:12px; font-weight:600; letter-spacing:-0.02em; }
+  .mark { display:inline-block; background:#ececef; -webkit-mask:url("../../media/brand/orbit-art.png") center/contain no-repeat; mask:url("../../media/brand/orbit-art.png") center/contain no-repeat luminance; aspect-ratio:1; }
+  .eyebrow { font-family:JBM; text-transform:uppercase; letter-spacing:.08em; color:var(--mute); font-weight:500; }
+  h1 { text-wrap:balance; font-weight:560; letter-spacing:-0.04em; line-height:1.0; }
+  h1 span { color:var(--mute); display:block; }
+  .win { position:absolute; border:1px solid var(--ls); border-radius:14px; overflow:hidden; box-shadow:0 40px 120px -20px rgb(0 0 0/.9),0 0 0 1px var(--ls); background:#0b0b0d; }
+  .win img, .win video { display:block; width:100%; height:auto; }
+  .phone { position:absolute; border-radius:44px; background:#0b0b0d; padding:10px; box-shadow:0 0 0 1px var(--ls), 0 40px 100px -20px rgb(0 0 0/.95); }
+  .phone .screen { border-radius:34px; overflow:hidden; position:relative; aspect-ratio:1170/2532; background:#050506; padding-top:13%; }
+  .phone .screen img, .phone .screen video { width:100%; height:100%; object-fit:cover; object-position:top; display:block; }
+  .phone .island { top:3.2% !important; height:3.6% !important; width:32% !important; }
+  .phone .island { position:absolute; top:10px; left:50%; translate:-50% 0; width:30%; height:5.5%; max-height:30px; border-radius:99px; background:#000; z-index:2; }
+  .art { position:absolute; mix-blend-mode:lighten; }
+</style></head>
+<body><div class="stage" id="stage"><canvas id="dither"></canvas></div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const W = +q.get("w"), H = +q.get("h"), layout = q.get("layout");
+document.documentElement.style.setProperty("--w", W + "px"); document.documentElement.style.setProperty("--h", H + "px");
+const raw = "../../media/raw/", brand = "../../media/brand/";
+const stage = document.getElementById("stage");
+const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); const n = t.content.firstChild; stage.appendChild(n); return n; };
+// Bayer 8x8 radial glow, same language as the site.
+const B = [0,48,12,60,3,51,15,63,32,16,44,28,35,19,47,31,8,56,4,52,11,59,7,55,40,24,36,20,43,27,39,23,2,50,14,62,1,49,13,61,34,18,46,30,33,17,45,29,10,58,6,54,9,57,5,53,42,26,38,22,41,25,37,21];
+function glow(cx, cy, rx, ry, px = 4, peak = 0.55) {
+  const c = document.getElementById("dither"); c.width = Math.ceil(W / px); c.height = Math.ceil(H / px); c.style.width = W + "px"; c.style.height = H + "px";
+  const g = c.getContext("2d"); const img = g.createImageData(c.width, c.height);
+  for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+    const dx = (x * px - cx) / rx, dy = (y * px - cy) / ry; const d = Math.sqrt(dx * dx + dy * dy);
+    const v = Math.max(0, 1 - d) ** 1.6 * peak; const t = (B[(y % 8) * 8 + (x % 8)] + 0.5) / 64;
+    if (v > t) { const i = (y * c.width + x) * 4; const k = v > 0.42 ? 99 : 52; img.data[i] = k; img.data[i+1] = k; img.data[i+2] = k + 6; img.data[i+3] = 255; }
+  }
+  g.putImageData(img, 0, 0);
+}
+const S = (W / 1200); // scale unit
+if (layout === "og") {
+  glow(W * 0.78, H * 0.62, W * 0.55, H * 0.75);
+  el(`<div class="brand" style="left:${56*S}px;top:${52*S}px;font-size:${30*S}px"><span class="mark" style="width:${48*S}px"></span>orbit</div>`);
+  el(`<div class="eyebrow" style="position:absolute;left:${56*S}px;top:${190*S}px;font-size:${14*S}px">Desktop + iPhone</div>`);
+  el(`<h1 style="position:absolute;left:${56*S}px;top:${226*S}px;font-size:${56*S}px;width:${560*S}px">Run a fleet of<br>coding agents.<span>Ship from anywhere.</span></h1>`);
+  el(`<div style="position:absolute;left:${56*S}px;bottom:${52*S}px;font-size:${19*S}px;color:var(--dim);width:${520*S}px;line-height:1.45;text-wrap:balance">Every task gets its own worktree, branch, and agent.</div>`);
+  el(`<div class="win" style="left:${660*S}px;top:${118*S}px;width:${760*S}px"><img src="${raw}orbit-dark-ship.png"></div>`);
+  el(`<div class="phone" style="left:${938*S}px;top:${300*S}px;width:${200*S}px;padding:${7*S}px;border-radius:${32*S}px"><div class="screen" style="border-radius:${25*S}px"><div class="island"></div><img src="${raw}mobile-inbox.png"></div></div>`);
+}
+if (layout === "square") {
+  glow(W * 0.5, H * 0.78, W * 0.7, H * 0.5, 5);
+  el(`<div class="brand" style="left:50%;translate:-50% 0;top:${84*S}px;font-size:${34*S}px"><span class="mark" style="width:${56*S}px"></span>orbit</div>`);
+  el(`<h1 style="position:absolute;left:0;right:0;text-align:center;top:${190*S}px;font-size:${76*S}px">Run a fleet of coding agents.<span>Ship from anywhere.</span></h1>`);
+  const media = q.get("video") ? `<video src="../../media/orbit-tour-dark-trim.mp4" muted autoplay loop playsinline></video>` : `<img src="${raw}orbit-dark-workspace.png">`;
+  el(`<div class="win" style="left:${90*S}px;top:${430*S}px;width:${1020*S}px">${media}</div>`);
+  const pm = q.get("video") ? `<video src="../../media/mobile-tour.mp4" muted autoplay loop playsinline></video>` : `<img src="${raw}mobile-workspace.png">`;
+  el(`<div class="phone" style="left:${850*S}px;top:${600*S}px;width:${250*S}px;padding:${9*S}px;border-radius:${40*S}px"><div class="screen" style="border-radius:${31*S}px"><div class="island"></div>${pm}</div></div>`);
+}
+const settle = (p) => Promise.race([p, new Promise((r) => setTimeout(r, 3000))]);
+await settle(Promise.all([...document.images].map((i) => (i.complete ? null : new Promise((r) => (i.onload = i.onerror = r))))));
+await settle(Promise.all([document.fonts.load("560 40px Inter"), document.fonts.load("500 14px JBM")]));
+window.__ready = true;
+</script></body></html>

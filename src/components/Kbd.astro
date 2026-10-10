@@ -1,0 +1,7 @@
+---
+interface Props { keys: string | string[] }
+const { keys } = Astro.props;
+const list = Array.isArray(keys) ? keys : [keys];
+---
+
+{list.map((k) => <kbd class="kbd">{k}</kbd>)}

@@ -1,0 +1,51 @@
+---
+import { Image } from "astro:assets";
+import mark from "../assets/brand/app-icon-desktop.png";
+import Button from "./Button.astro";
+import GithubMark from "./GithubMark.astro";
+import { UPDATES_URL } from "../config";
+
+const links = [
+  { href: "#features", label: "Product" },
+  { href: "#mobile", label: "Mobile" },
+  { href: "#how", label: "How it works" },
+];
+---
+
+<header data-nav class="nav">
+  <div class="container-wide bar">
+    <a href="#top" class="brand" aria-label="Orbit home">
+      <Image src={mark} alt="" width={28} height={28} densities={[1, 2]} format="png" class="mark" />
+      <span>orbit</span>
+    </a>
+    <nav class="links" aria-label="Primary">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <Button href={UPDATES_URL} variant="secondary" size="sm" aria-label="Follow Orbit launch updates">
+      <GithubMark size={15} />
+      <span>Follow</span>
+    </Button>
+  </div>
+  <div class="dither-rule rule"></div>
+</header>
+
+<style>
+  .nav {
+    position: fixed; inset: 0 0 auto 0; z-index: 50; height: 64px;
+    transition: background-color .25s, backdrop-filter .25s;
+  }
+  .nav[data-scrolled] {
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  }
+  .rule { position: absolute; bottom: 0; left: 0; opacity: 0; transition: opacity .25s; }
+  .nav[data-scrolled] .rule { opacity: 1; }
+  .bar { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--fg); font-weight: 600; font-size: 20px; letter-spacing: -0.03em; }
+  .brand :global(.mark) { width: 28px; height: 28px; border-radius: 6px; mix-blend-mode: lighten; }
+  .links { display: flex; gap: 32px; margin-left: auto; margin-right: 32px; }
+  .links a { font-size: 14px; font-weight: 450; color: var(--dim); transition: color .15s; }
+  .links a:hover { color: var(--fg); }
+  @media (max-width: 767px) { .links { display: none; } }
+</style>
+

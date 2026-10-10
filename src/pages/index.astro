@@ -1,0 +1,510 @@
+---
+import { Image, Picture } from "astro:assets";
+import Layout from "../components/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Button from "../components/Button.astro";
+import Eyebrow from "../components/Eyebrow.astro";
+import GithubMark from "../components/GithubMark.astro";
+import DitherField from "../components/DitherField.astro";
+import DitherReveal from "../components/DitherReveal.astro";
+import OrbitArt from "../components/OrbitArt.astro";
+import WindowFrame from "../components/WindowFrame.astro";
+import PhoneFrame from "../components/PhoneFrame.astro";
+import Kbd from "../components/Kbd.astro";
+import Footer from "../components/Footer.astro";
+import { UPDATES_URL } from "../config";
+import cropContext from "../assets/crops/context.png";
+import cropSession from "../assets/crops/session.png";
+import cropSync from "../assets/crops/sync.png";
+import lightWs from "../assets/raw/orbit-light-workspace.png";
+import workspace from "../assets/raw/orbit-dark-workspace.png";
+import inbox from "../assets/raw/orbit-dark-inbox.png";
+import ship from "../assets/raw/orbit-dark-ship.png";
+import palette from "../assets/raw/orbit-dark-palette.png";
+import issues from "../assets/raw/orbit-dark-issues.png";
+import routines from "../assets/raw/orbit-dark-routines.png";
+import mobileWorkspace from "../assets/raw/mobile-workspace.png";
+import mobileInbox from "../assets/raw/mobile-inbox.png";
+import mobileDiff from "../assets/raw/mobile-diff.png";
+
+const statement =
+  "Agents are fast. Waiting on them isn't. Orbit runs every task in its own worktree and tells you the moment one needs you: a question, a failed check, a finished pull request.";
+const words = statement.split(" ");
+
+const features = [
+  {
+    title: "One task, one worktree.",
+    body: "Start a workspace and Orbit cuts a fresh branch and worktree for it. Claude Code and Codex run side by side in their own checkouts, with live diff stats in the sidebar.",
+    kbd: ["Ctrl N"],
+    media: [{ img: workspace, alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats." }],
+  },
+  {
+    title: "Only what needs you.",
+    body: "The inbox collects every agent that asked a question, failed, or finished, plus any pull request with red checks. Suggested replies are one keystroke away.",
+    kbd: ["Ctrl I", "J", "K", "E", "S"],
+    media: [{ img: inbox, alt: "Orbit inbox listing agents that asked, failed, or finished." }],
+  },
+  {
+    title: "From fix to merge in one panel.",
+    body: "Ship shows the draft PR, check status, review state, and every changed file. Fix CI and Address comments hand the failure straight back to the agent.",
+    kbd: ["Ctrl ."],
+    media: [{ img: ship, alt: "Orbit Ship panel with the draft pull request, checks and changed files." }],
+  },
+  {
+    title: "Agents with a job description.",
+    body: "Builder, Debugger, Planner, Reviewer, Shipper. Read-only profiles are blocked from writing at the tool layer, not asked nicely in a prompt. Add skill packs from any git URL.",
+    kbd: ["Ctrl K"],
+    media: [{ img: palette, alt: "Orbit command palette." }],
+  },
+  {
+    title: "Work starts from the backlog.",
+    body: "Pull in GitHub issues and press Enter to start one in a fresh workspace. Routines send messages on a schedule while Orbit is open, like triage at nine and checks at two.",
+    kbd: ["Ctrl Shift G"],
+    media: [
+      { img: issues, alt: "Orbit issues view." },
+      { img: routines, alt: "Orbit routines view." },
+    ],
+  },
+];
+const slides = features.flatMap((f, step) => f.media.map((m, sub) => ({ ...m, step, sub })));
+
+const steps = [
+  { title: "Add a repo.", line: "Point Orbit at any git repository on your machine." },
+  { title: "Start workspaces.", line: "Each one is a branch, a worktree, and an agent. Run as many as you like." },
+  { title: "Review and ship.", line: "Answer from the inbox, open a PR from Ship, or do it all from your phone." },
+];
+
+const facts = [
+  { label: "ENCRYPTED", line: "End-to-end encrypted after the pairing handshake." },
+  { label: "LIVE", line: "Transcripts stream as the agent works." },
+  { label: "IN CONTROL", line: "Send a message or stop a turn from your phone." },
+];
+---
+
+<Layout>
+  <Nav />
+  <main id="top">
+    <!-- HERO -->
+    <section id="hero" class="hero">
+      <div class="container hero-copy">
+        <Eyebrow data-hero-in>ORBIT 0.1 — DESKTOP + IPHONE</Eyebrow>
+        <h1 class="display h1">
+          <span data-hero-in class="line">Run a fleet of coding agents.</span>
+          <span data-hero-in class="line mute">Ship from anywhere.</span>
+        </h1>
+        <p class="lead" data-hero-in>
+          Orbit is a desktop IDE for Claude Code and Codex. Every task gets its own worktree, branch, and agent, so ten things can move at once without stepping on each other.
+        </p>
+        <div class="ctas" data-hero-in>
+          <Button href={UPDATES_URL}>
+            <GithubMark size={18} />
+            Follow launch updates
+          </Button>
+          <Button href="#features" variant="secondary">
+            <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"></path></svg>
+            Watch the tour
+          </Button>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="field-wrap" data-parallax="0.5" aria-hidden="true">
+          <DitherField cell={3} strength={0.7} power={1.5} />
+        </div>
+        <div class="art">
+          <DitherReveal trigger="load" delay={0.25} cell={4}>
+            <OrbitArt size="var(--art)" />
+          </DitherReveal>
+        </div>
+        <div class="container-wide window-wrap">
+          <div class="window-stage">
+            <WindowFrame
+              data-hero-window
+              video="orbit-tour-dark"
+              posterSrc="media/orbit-tour-dark-poster.jpg"
+              preload="metadata"
+              alt="Orbit workspace: a Claude Code agent fixing a crash in its own worktree, with the fleet listed in the sidebar."
+            />
+            <div class="hero-phone">
+              <div data-hero-phone>
+                <PhoneFrame video="mobile-tour" poster={mobileWorkspace} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATEMENT -->
+    <section id="statement" class="section statement">
+      <div class="container">
+        <p class="statement-text" data-statement>
+          {words.map((w) => <><span class="word">{w}</span>{" "}</>)}
+        </p>
+      </div>
+    </section>
+
+    <!-- FEATURES: pinned story -->
+    <section id="features" class="section features" data-features>
+      <div class="feat-pin" data-feat-pin>
+        <div class="container-wide feat-grid">
+          <div class="feat-left">
+            <Eyebrow>PRODUCT</Eyebrow>
+            <h2 class="h2 feat-h2">One window for the whole fleet. <span class="mute">Start it, steer it, ship it.</span></h2>
+            <ol class="feat-list">
+              {
+                features.map((f, i) => (
+                  <li class="item" data-feat-item data-active={i === 0 ? "" : undefined}>
+                    <button type="button" class="item-head" data-feat-head>
+                      <span class="idx">{String(i + 1).padStart(2, "0")}</span>
+                      <span class="title">{f.title}</span>
+                    </button>
+                    <div class="item-body">
+                      <div class="item-inner">
+                        <p class="body">{f.body}</p>
+                        <div class="kbds"><Kbd keys={f.kbd} /></div>
+                        <div class="item-media">
+                          {f.media.map((m) => (
+                            <WindowFrame image={m.img} alt={m.alt} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))
+              }
+            </ol>
+            <div class="counter" aria-hidden="true"><span data-feat-count>01</span> / 05</div>
+          </div>
+          <div class="feat-right">
+            <div class="feat-field" aria-hidden="true"><DitherField cell={3} strength={0.5} power={1.4} /></div>
+            <WindowFrame class="feat-window" alt="">
+              {
+                slides.map((m, k) => (
+                  <div class="slide" data-feat-slide data-active={k === 0 ? "" : undefined}>
+                    <Picture src={m.img} alt={m.alt} formats={["avif", "webp"]} widths={[1280, 1920, 2560]} sizes="(min-width: 1344px) 700px, 60vw" loading="lazy" />
+                  </div>
+                ))
+              }
+            </WindowFrame>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOBILE -->
+    <section id="mobile" class="section mobile">
+      <div class="container mobile-head">
+        <Eyebrow>ORBIT MOBILE</Eyebrow>
+        <h2 class="h2">Leave the desk. <span class="mute">Keep the fleet moving.</span></h2>
+        <p class="lead">
+          Pair your iPhone by scanning a QR code in Orbit. Read transcripts, review diffs, answer questions, and stop a runaway turn, over your local network or Tailscale.
+        </p>
+      </div>
+      <div class="container-wide">
+        <div class="fan" data-fan>
+          <DitherReveal class="fan-phone fan-left" cell={4}><PhoneFrame image={mobileInbox} alt="Orbit Mobile inbox." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-right" cell={4}><PhoneFrame image={mobileDiff} alt="Orbit Mobile diff review." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-center" cell={4}><PhoneFrame video="mobile-tour" poster={mobileWorkspace} /></DitherReveal>
+        </div>
+        <ul class="facts">
+          {
+            facts.map((f) => (
+              <li class="fact">
+                <div class="dither-rule"></div>
+                <Eyebrow class="fact-label">{f.label}</Eyebrow>
+                <p>{f.line}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section how" data-how>
+      <div class="container">
+        <Eyebrow>HOW IT WORKS</Eyebrow>
+        <h2 class="h2 sec-h2">Three steps. <span class="mute">No new workflow to learn.</span></h2>
+        <ol class="steps">
+          {
+            steps.map((s, i) => (
+              <li class="step" data-step>
+                <div class="num-row">
+                  <span class="num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                  {i < steps.length - 1 && <span class="rule" aria-hidden="true"></span>}
+                </div>
+                <div class="step-text">
+                  <h3 class="h3">{s.title}</h3>
+                  <p>{s.line}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <!-- DETAILS -->
+    <section id="details" class="section details">
+      <div class="container">
+        <Eyebrow>DETAILS</Eyebrow>
+        <h2 class="h2 sec-h2">Built for the long session.</h2>
+        <div class="tiles">
+          <article class="tile t-context">
+            <div class="tile-media"><Image src={cropContext} alt="Context meter reading 85%, 170k of 200k tokens." widths={[640, 1000]} sizes="(min-width: 1024px) 690px, 100vw" /></div>
+            <div class="tile-text">
+              <Eyebrow class="tile-label">CONTEXT METER</Eyebrow>
+              <p>See the context window fill up, and compact before it's full.</p>
+            </div>
+          </article>
+          <article class="tile t-session">
+            <div class="tile-media"><Image src={cropSession} alt="Turn summary: 1m 14s, 19k tokens, $0.21." widths={[480, 960]} sizes="(min-width: 1024px) 480px, 100vw" /></div>
+            <div class="tile-text">
+              <Eyebrow class="tile-label">SESSIONS RESUME</Eyebrow>
+              <p>Close Orbit mid-run. Every session picks up where it left off.</p>
+            </div>
+          </article>
+          <article class="tile t-paper">
+            <div class="tile-media split" data-split>
+              <Picture src={lightWs} alt="Orbit in the light theme." formats={["avif", "webp"]} widths={[640, 1280]} sizes="(min-width: 1024px) 480px, 100vw" class="layer" />
+              <div class="dark-layer" data-split-dark>
+                <Picture src={workspace} alt="Orbit in the dark theme." formats={["avif", "webp"]} widths={[640, 1280]} sizes="(min-width: 1024px) 480px, 100vw" class="layer" />
+              </div>
+              <svg class="seam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <line data-split-line x1="62" y1="0" x2="38" y2="100" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+              </svg>
+            </div>
+            <div class="tile-text">
+              <Eyebrow class="tile-label">PAPER AND VOID</Eyebrow>
+              <p>A light theme and a dark theme, both greyscale, so status colour always means something.</p>
+            </div>
+          </article>
+          <article class="tile t-sync">
+            <div class="tile-media"><Image src={cropSync} alt="Inbox row: Migrate billing schema, needs sync, conflicts with base." widths={[690, 1380]} sizes="(min-width: 1024px) 690px, 100vw" /></div>
+            <div class="tile-text">
+              <Eyebrow class="tile-label">KEEPS UP WITH MAIN</Eyebrow>
+              <p>Branches sync with base automatically, and conflicts reach your inbox.</p>
+            </div>
+          </article>
+          <article class="tile t-keys">
+            <div class="tile-media keys" aria-hidden="true">
+              <div class="keys-row"><kbd class="kbd kbd-lg">Ctrl K</kbd><kbd class="kbd kbd-lg">Ctrl I</kbd></div>
+              <div class="keys-row shift"><kbd class="kbd kbd-lg">Ctrl N</kbd><kbd class="kbd kbd-lg">Ctrl .</kbd><kbd class="kbd kbd-lg">J</kbd><kbd class="kbd kbd-lg">K</kbd></div>
+            </div>
+            <div class="tile-text">
+              <Eyebrow class="tile-label">KEYBOARD FIRST</Eyebrow>
+              <p>Every view has a shortcut.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section id="cta" class="cta">
+      <div class="cta-horizon" aria-hidden="true">
+        <DitherReveal cell={4} class="cta-reveal">
+          <DitherField variant="horizon" hi="dim" cell={3} strength={0.9} />
+        </DitherReveal>
+      </div>
+      <div class="container cta-inner">
+        <DitherReveal cell={4}><OrbitArt size={168} /></DitherReveal>
+        <h2 class="h2">Run your next ten tasks in parallel.</h2>
+        <p class="lead">Orbit is in development. Desktop and mobile open-source repos coming soon. Follow launch updates and share what you want to build.</p>
+        <div class="ctas">
+          <Button href={UPDATES_URL}><GithubMark size={18} />Follow launch updates</Button>
+          <Button href="#mobile" variant="secondary">Explore Orbit Mobile</Button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* ---------- Hero ---------- */
+  .hero { --art: min(520px, 78vw); position: relative; overflow: clip; padding-top: calc(64px + 80px); padding-bottom: 96px; }
+  .hero-copy { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 10; }
+  .h1 { margin-top: 24px; }
+  .h1 .line { display: block; }
+  .hero-copy .lead { margin-top: 24px; }
+  .ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 36px; }
+
+  .stage { position: relative; margin-top: 16px; }
+  /* Radial glow centred on the black hole (0.475 of the art), starting 40px below the CTAs. */
+  .field-wrap {
+    --fw: min(1100px, 150vw);
+    position: absolute; z-index: 0; top: 24px; width: var(--fw); height: calc(var(--art) * 0.95 - 48px);
+    left: calc(50% - var(--fw) / 2); pointer-events: none;
+  }
+  .art { position: relative; display: flex; justify-content: center; height: var(--art); pointer-events: none; }
+  .window-wrap { position: relative; z-index: 10; margin-top: calc(var(--art) * -0.42); }
+  @media (max-width: 639px) { .window-wrap { margin-top: calc(var(--art) * -0.5); } }
+  .window-stage { position: relative; perspective: 1600px; max-width: 1200px; margin-inline: auto; }
+  .window-stage :global([data-hero-window]) { will-change: transform; }
+
+  /* About 35% of the phone's width sits past the window's right edge, 10% of its height past the bottom. */
+  .hero-phone {
+    position: absolute; z-index: 11; width: 15%; bottom: 0; transform: translateY(10%);
+    left: calc(100% - 15% * 0.65);
+  }
+  @media (max-width: 1339px) { .hero-phone { left: calc(85% + var(--gutter) * 0.9); } }
+  @media (max-width: 1023px) { .hero-phone { display: none; } }
+
+  /* ---------- Statement ---------- */
+  .statement { padding-top: 64px; }
+  .statement-text {
+    max-width: 960px; margin: 0; font-size: clamp(28px, 3.6vw, 48px); font-weight: 540;
+    letter-spacing: -0.03em; line-height: 1.18; color: var(--fg); text-wrap: pretty;
+  }
+
+  /* ---------- Features (mobile-first: stacked) ---------- */
+  .features { overflow-x: clip; padding-top: 64px; }
+  .feat-grid { display: block; }
+  .feat-h2 { margin-top: 20px; font-size: clamp(34px, 3.4vw, 46px); }
+  .feat-h2 span { display: block; text-wrap: balance; }
+  .feat-list { list-style: none; margin: 40px 0 0; padding: 0; display: grid; gap: 56px; }
+  .item-head {
+    display: flex; align-items: baseline; gap: 16px; width: 100%; padding: 0; margin: 0; background: none; border: 0;
+    text-align: left; color: var(--fg); font: inherit; pointer-events: none;
+  }
+  .idx { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; color: var(--mute); width: 24px; flex: none; }
+  .title { font-size: 22px; font-weight: 520; letter-spacing: -0.015em; line-height: 1.25; }
+  .item-body { display: block; }
+  .item-inner { padding-top: 14px; }
+  .body { margin: 0; color: var(--dim); max-width: 520px; text-wrap: pretty; }
+  .kbds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .item-media { display: grid; gap: 16px; margin-top: 24px; }
+  .feat-right, .counter { display: none; }
+
+  @media (min-width: 1024px) {
+    .features { padding-top: 0; }
+    .feat-pin { height: 100vh; min-height: 720px; display: flex; align-items: center; padding-top: 64px; }
+    .feat-grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: center; }
+    .feat-left { grid-column: 1 / span 5; padding-right: 16px; }
+    .feat-right { display: block; grid-column: 6 / span 7; position: relative; }
+    .feat-list { gap: 0; margin-top: 32px; }
+    .item { position: relative; padding-left: 20px; }
+    .item::before, .item::after { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 2px; }
+    .item::before { background: var(--line); }
+    .item::after { background: var(--fg); transform: scaleY(0); transform-origin: top; transition: transform .5s cubic-bezier(.22, 1, .36, 1); }
+    .item[data-active]::after { transform: scaleY(1); }
+    .item-head { padding: 9px 0; cursor: pointer; color: var(--mute); pointer-events: auto; transition: color .3s; }
+    .item-head:hover { color: var(--dim); }
+    .item[data-active] .item-head { color: var(--fg); }
+    .item-body { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .5s cubic-bezier(.22, 1, .36, 1), opacity .4s; }
+    .item[data-active] .item-body { grid-template-rows: 1fr; opacity: 1; }
+    .item-inner { overflow: hidden; min-height: 0; padding: 0 0 8px 40px; }
+    .item-media { display: none; }
+    .counter { display: block; margin-top: 28px; font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; color: var(--mute); }
+    .counter span { color: var(--fg); }
+
+    .feat-field { position: absolute; z-index: 0; width: 124%; height: 150%; left: -12%; top: -25%; pointer-events: none; }
+    .feat-right :global(.feat-window) { position: relative; z-index: 1; }
+    .slide { position: absolute; inset: 0; opacity: 0; transform: scale(1.02); transition: opacity .7s ease, transform .9s cubic-bezier(.22, 1, .36, 1); }
+    .slide[data-active] { opacity: 1; transform: none; }
+    .slide :global(img), .slide :global(picture) { width: 100%; height: 100%; display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .item::after, .item-body { transition: none; }
+  }
+
+  /* ---------- Mobile ---------- */
+  .mobile { overflow-x: clip; }
+  .mobile-head { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .mobile-head .h2 { margin-top: 20px; }
+  .mobile-head .lead { margin-top: 20px; }
+  .fan { --pw: 260px; position: relative; height: calc((var(--pw) - 20px) * 2.1641 + 20px + 72px); margin-top: 56px; }
+  .fan :global(.fan-phone) { position: absolute; top: 48px; left: 50%; width: var(--pw); margin-left: calc(var(--pw) / -2); }
+  .fan :global(.fan-left) { transform: translateX(-72%) rotate(-6deg); z-index: 1; display: none; }
+  .fan :global(.fan-right) { transform: translateX(72%) rotate(6deg); z-index: 1; display: none; }
+  .fan :global(.fan-center) { transform: translateY(-24px); z-index: 2; }
+  @media (min-width: 640px) {
+    .fan { --pw: clamp(220px, 28vw, 300px); }
+    .fan :global(.fan-left), .fan :global(.fan-right) { display: block; }
+  }
+
+  .facts { list-style: none; margin: 96px 0 0; padding: 0; display: grid; gap: 40px; }
+  .fact :global(.fact-label) { display: block; margin-top: 20px; color: var(--fg); }
+  .fact p { margin: 12px 0 0; max-width: 30ch; }
+  @media (min-width: 768px) { .facts { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
+  @media (max-width: 639px) { .facts { margin-top: 64px; } }
+
+  /* ---------- Shared ---------- */
+  .sec-h2 { margin-top: 20px; }
+
+  /* ---------- How it works ---------- */
+  .steps { list-style: none; margin: 72px 0 0; padding: 0; display: grid; gap: 0; }
+  .num-row { display: flex; align-items: center; gap: 24px; }
+  .num { font: 500 64px/1 var(--font-mono); letter-spacing: -0.04em; color: var(--fg); will-change: transform; }
+  :global(html.js) .num { color: var(--line-strong); }
+  .rule {
+    flex: 1; height: 1px; margin-right: 24px;
+    background-image: radial-gradient(circle at 0.5px 0.5px, var(--line-strong) 0.5px, transparent 0.75px);
+    background-size: 4px 1px; background-repeat: repeat-x;
+  }
+  .step-text { margin-top: 28px; }
+  .step-text p { margin: 8px 0 0; max-width: 32ch; }
+  @media (min-width: 768px) {
+    .steps { grid-template-columns: repeat(3, 1fr); column-gap: 0; }
+  }
+  @media (max-width: 767px) {
+    .steps { margin-top: 56px; }
+    .step { display: grid; grid-template-columns: 76px 1fr; column-gap: 20px; padding-bottom: 40px; }
+    .step:last-child { padding-bottom: 0; }
+    .num-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .num { font-size: 48px; }
+    .rule {
+      width: 1px; height: auto; margin: 0 0 0 16px; background-image: radial-gradient(circle at 0.5px 0.5px, var(--line-strong) 0.5px, transparent 0.75px);
+      background-size: 1px 4px; background-repeat: repeat-y;
+    }
+    .step-text { margin-top: 6px; }
+  }
+
+  /* ---------- Details ---------- */
+  .tiles { margin-top: 64px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  .tile { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+  .tile-media { position: relative; flex: 1; min-height: 140px; background: var(--bg); display: flex; align-items: center; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .tile-media :global(img) { width: 100%; height: auto; display: block; }
+  .tile-text { padding: 20px 24px 24px; }
+  .tile-text :global(.tile-label) { color: var(--fg); }
+  .tile-text p { margin: 12px 0 0; max-width: 44ch; text-wrap: pretty; }
+
+  .t-context .tile-media { align-items: flex-end; }
+  .t-session .tile-media { align-items: flex-start; }
+  .t-session .tile-media :global(img) { margin-top: 16px; }
+  .t-sync .tile-media { min-height: 120px; }
+
+  .split { min-height: 360px; align-items: stretch; --s: 50%; }
+  .tile-media.split :global(picture), .tile-media.split :global(img), .dark-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tile-media.split :global(img) { object-fit: cover; object-position: 0% 0%; }
+  .dark-layer { clip-path: polygon(calc(var(--s) + 14%) 0, 100% 0, 100% 100%, calc(var(--s) - 14%) 100%); }
+  .seam { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--mute); pointer-events: none; }
+
+  .keys { flex-direction: column; justify-content: center; gap: 18px; padding: 44px 24px; background:
+    radial-gradient(circle at 0.5px 0.5px, var(--line) 0.5px, transparent 0.75px) 0 0 / 8px 8px, var(--bg); }
+  .keys-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center; }
+  .keys-row.shift { transform: translateX(28px); }
+
+  @media (min-width: 1024px) {
+    .tiles { grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .t-context { grid-column: 1 / span 7; }
+    .t-session { grid-column: 8 / span 5; }
+    .t-paper { grid-column: 1 / span 5; grid-row: 2 / span 2; }
+    .t-sync { grid-column: 6 / span 7; }
+    .t-keys { grid-column: 6 / span 7; }
+  }
+  @media (max-width: 639px) { .keys-row.shift { transform: none; } .keys :global(.kbd-lg) { font-size: 16px; padding: 10px 14px; } }
+
+  /* ---------- Final CTA ---------- */
+  .cta { position: relative; overflow: clip; padding-top: var(--section-y); padding-bottom: 300px; margin-top: var(--section-y); }
+  .cta-horizon { position: absolute; left: 0; right: 0; bottom: 0; height: 420px; z-index: 0; pointer-events: none; }
+  .cta-horizon :global(.cta-reveal) { position: absolute; inset: 0; }
+  .cta-inner { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .cta-inner .h2 { margin-top: 32px; max-width: 14em; }
+  .cta-inner .lead { margin-top: 20px; }
+  .cta-inner .ctas { margin-top: 36px; }
+  @media (max-width: 639px) { .cta { padding-bottom: 240px; } .cta-horizon { height: 320px; } }
+</style>
+

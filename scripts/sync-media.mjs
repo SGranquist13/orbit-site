@@ -18,8 +18,8 @@ for (const f of wanted) copyFileSync(`media/raw/${f}`, `src/assets/raw/${f}`);
 const videos = [
   ["orbit-tour-dark-trim.mp4", "orbit-tour-dark.mp4"],
   ["orbit-tour-dark-trim.webm", "orbit-tour-dark.webm"],
-  ["mobile-tour.mp4", "mobile-tour.mp4"],
-  ["mobile-tour.webm", "mobile-tour.webm"],
+  ["mobile-tour-trim.mp4", "mobile-tour.mp4"],
+  ["mobile-tour-trim.webm", "mobile-tour.webm"],
   ["orbit-tour-dark-poster.jpg", "orbit-tour-dark-poster.jpg"],
 ];
 for (const [from, to] of videos) copyFileSync(`media/${from}`, `public/media/${to}`);

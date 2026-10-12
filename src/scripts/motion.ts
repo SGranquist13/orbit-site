@@ -1,7 +1,7 @@
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { initDitherEdges, initDitherFields, initDitherReveals } from "./dither";
+import { initDitherFields, initDitherReveals } from "./dither";
 import { initOrbits } from "./orbit";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,7 +30,6 @@ if (!reduced && "IntersectionObserver" in window) {
 }
 
 initDitherFields();
-initDitherEdges();
 initOrbits(reduced);
 initDitherReveals(reduced);
 
@@ -184,16 +183,43 @@ if (features) {
   });
 }
 
-/* 7. Mobile phone fan: sides slide out and rotate, centre rises. */
+const cssVar = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+/* Why Orbit: as each row crosses the middle of the viewport, the usual way fades back
+   (its red pixel greys out) and Orbit's side comes forward (its pixel turns green). Scrubbed. */
+document.querySelectorAll<HTMLElement>("[data-why-row]").forEach((row) => {
+  if (reduced) return;
+  const st = { trigger: row, start: "top 82%", end: "top 48%", scrub: 0.6 };
+  const before = row.querySelector(".why-before");
+  const after = row.querySelector(".why-after");
+  const pxB = row.querySelector(".px-before");
+  const pxA = row.querySelector(".px-after");
+  if (before) gsap.fromTo(before, { opacity: 1 }, { opacity: 0.55, ease: "none", scrollTrigger: st });
+  if (pxB) gsap.fromTo(pxB, { backgroundColor: cssVar("--bad") }, { backgroundColor: cssVar("--line-strong"), ease: "none", scrollTrigger: st });
+  if (after) gsap.fromTo(after, { opacity: 0.25, x: 12 }, { opacity: 1, x: 0, ease: "none", scrollTrigger: st });
+  if (pxA) gsap.fromTo(pxA, { backgroundColor: cssVar("--line-strong") }, { backgroundColor: cssVar("--ok"), ease: "none", scrollTrigger: st });
+});
+
+/* 7. Mobile phone fan: phones start stacked behind the centre one and fan out as the section enters.
+   Inner pair first, the outer pair (wide screens only) follows a beat later; the centre rises. */
 const fan = document.querySelector<HTMLElement>("[data-fan]");
 if (fan && !reduced) {
   const mq = gsap.matchMedia();
-  mq.add("(min-width: 640px)", () => {
-    gsap.set(".fan-left, .fan-right, .fan-center", { clearProps: "transform" });
-    const st = { trigger: fan, start: "top 80%", end: "center 55%", scrub: 0.6 };
-    gsap.fromTo(".fan-left", { xPercent: 0, rotate: 0 }, { xPercent: -72, rotate: -6, ease: "none", scrollTrigger: st });
-    gsap.fromTo(".fan-right", { xPercent: 0, rotate: 0 }, { xPercent: 72, rotate: 6, ease: "none", scrollTrigger: st });
+  const inner = (st: ScrollTrigger.Vars) => {
+    gsap.fromTo(".fan-left", { xPercent: 0, y: 0, rotate: 0, scale: 1 }, { xPercent: -58, y: 12, rotate: -5, scale: 0.94, ease: "none", scrollTrigger: st });
+    gsap.fromTo(".fan-right", { xPercent: 0, y: 0, rotate: 0, scale: 1 }, { xPercent: 58, y: 12, rotate: 5, scale: 0.94, ease: "none", scrollTrigger: st });
     gsap.fromTo(".fan-center", { y: 0 }, { y: -24, ease: "none", scrollTrigger: st });
+  };
+  mq.add("(min-width: 640px) and (max-width: 1099px)", () => {
+    gsap.set(".fan-phone", { clearProps: "transform" });
+    inner({ trigger: fan, start: "top 80%", end: "center 55%", scrub: 0.6 });
+  });
+  mq.add("(min-width: 1100px)", () => {
+    gsap.set(".fan-phone", { clearProps: "transform" });
+    inner({ trigger: fan, start: "top 80%", end: "center 60%", scrub: 0.6 });
+    const outer = { trigger: fan, start: "top 70%", end: "center 50%", scrub: 0.6 };
+    gsap.fromTo(".fan-outer-left", { xPercent: -58, y: 12, rotate: -5, scale: 0.94 }, { xPercent: -106, y: 40, rotate: -9, scale: 0.86, ease: "none", scrollTrigger: outer });
+    gsap.fromTo(".fan-outer-right", { xPercent: 58, y: 12, rotate: 5, scale: 0.94 }, { xPercent: 106, y: 40, rotate: 9, scale: 0.86, ease: "none", scrollTrigger: outer });
   });
 }
 

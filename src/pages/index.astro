@@ -26,7 +26,9 @@ const shot = (name: string): ImageMetadata => {
 };
 const workspace = shot("orbit-dark-workspace.png");
 const mobileWorkspace = shot("mobile-workspace.png");
+const mobileWorkspaces = shot("mobile-workspaces.png");
 const mobileInbox = shot("mobile-inbox.png");
+const mobileActivity = shot("mobile-activity.png");
 const mobileDiff = shot("mobile-diff.png");
 
 const statement =
@@ -90,6 +92,17 @@ const steps = [
   { title: "Add a repo.", line: "Point Orbit at any git repository on your machine." },
   { title: "Start workspaces.", line: "Each one is a branch, a worktree, and an agent. Run as many as you like." },
   { title: "Review and ship.", line: "Answer from the inbox, open a PR from Ship, or do it all from your phone." },
+];
+
+// "Why Orbit": the usual way vs Orbit. Every Orbit claim maps to a built feature in src/data/features.ts.
+const why = [
+  { label: "RUNNING TEN", before: "Ten terminal tabs, and ten branches to keep in your head.", orbit: "Ten workspaces in one sidebar, each in its own worktree, with live status and diff stats." },
+  { label: "KNOWING WHEN", before: "You check every tab to find the one that's stuck.", orbit: "The inbox lists only what needs you, with a suggested reply one keystroke away." },
+  { label: "SHIPPING", before: "The agent stops at a diff. The PR, the CI and the merge are on you.", orbit: "Ship opens the PR, Fix CI chases red checks, and merge waits for green." },
+  { label: "STAYING CLEAN", before: "Branches drift, collide and pile up.", orbit: "Save points, auto-sync onto main, overlap warnings, and cleanup after merge." },
+  { label: "GUARDRAILS", before: "“Please don't edit anything,” written in the prompt.", orbit: "Read-only roles, blocked at the tool layer." },
+  { label: "AWAY FROM THE DESK", before: "Work stalls the moment you walk away.", orbit: "Answer, steer or stop any agent from your phone, end-to-end encrypted." },
+  { label: "YOUR STACK", before: "Another app, with its own account, its own model and its own bill.", orbit: "Your own Claude Code and Codex, on your machine and your accounts." },
 ];
 
 const facts = [
@@ -237,6 +250,30 @@ const keyLabel = (k: string[]) => k.join(" ");
       </div>
     </section>
 
+    <!-- WHY ORBIT -->
+    <section id="why" class="section why" data-why>
+      <div class="container">
+        <Eyebrow>WHY ORBIT</Eyebrow>
+        <h2 class="h2 sec-h2">Most tools help agents write code.<br /> <span class="mute">Orbit gets it shipped.</span></h2>
+        <div class="why-table" role="table" aria-label="The usual way compared with Orbit">
+          <div class="why-row why-head" role="row">
+            <span role="columnheader"><span class="sr-only">Area</span></span>
+            <span class="eyebrow" role="columnheader">The usual way</span>
+            <span class="eyebrow why-orbit-head" role="columnheader">Orbit</span>
+          </div>
+          {
+            why.map((r) => (
+              <div class="why-row" role="row" data-why-row>
+                <span class="why-label eyebrow" role="rowheader">{r.label}</span>
+                <p class="why-before" role="cell"><i class="why-px px-before" aria-hidden="true"></i>{r.before}</p>
+                <p class="why-after" role="cell"><i class="why-px px-after" aria-hidden="true"></i>{r.orbit}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
     <!-- MOBILE -->
     <section id="mobile" class="section mobile">
       <div class="container mobile-head">
@@ -248,8 +285,10 @@ const keyLabel = (k: string[]) => k.join(" ");
       </div>
       <div class="container-wide">
         <div class="fan" data-fan>
-          <DitherReveal class="fan-phone fan-left" cell={4}><PhoneFrame image={mobileInbox} alt="Orbit Mobile inbox." /></DitherReveal>
-          <DitherReveal class="fan-phone fan-right" cell={4}><PhoneFrame image={mobileDiff} alt="Orbit Mobile diff review." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-outer fan-outer-left" cell={4} delay={0.2}><PhoneFrame image={mobileWorkspaces} alt="Orbit Mobile workspaces dashboard." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-outer fan-outer-right" cell={4} delay={0.2}><PhoneFrame image={mobileActivity} alt="Orbit Mobile activity timeline." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-left" cell={4} delay={0.1}><PhoneFrame image={mobileInbox} alt="Orbit Mobile inbox." /></DitherReveal>
+          <DitherReveal class="fan-phone fan-right" cell={4} delay={0.1}><PhoneFrame image={mobileDiff} alt="Orbit Mobile diff review." /></DitherReveal>
           <DitherReveal class="fan-phone fan-center" cell={4}><PhoneFrame video="mobile-tour" poster={mobileWorkspace} /></DitherReveal>
         </div>
         <ul class="facts">
@@ -521,18 +560,45 @@ const keyLabel = (k: string[]) => k.join(" ");
   }
 
   /* ---------- Mobile ---------- */
+  .why-table { margin-top: 64px; }
+  .why-row { display: grid; grid-template-columns: 1fr; gap: 10px; padding-block: 28px; position: relative; }
+  .why-row::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 1px;
+    background-image: radial-gradient(circle at 0.5px 0.5px, var(--line-strong) 0.5px, transparent 0.75px); background-size: 4px 1px; background-repeat: repeat-x; }
+  .why-head { display: none; }
+  .why-label { color: var(--mute); }
+  .why-before, .why-after { margin: 0; display: flex; gap: 14px; align-items: baseline; font-size: 16px; line-height: 1.55; }
+  .why-before { color: var(--mute); }
+  .why-after { color: var(--fg); font-size: 17px; }
+  .why-px { flex: none; width: 6px; height: 6px; transform: translateY(-2px); }
+  .px-before { background: var(--bad); }
+  .px-after { background: var(--ok); }
+  @media (min-width: 900px) {
+    .why-row { grid-template-columns: 200px 1fr 1.2fr; gap: 40px; align-items: baseline; padding-block: 30px; }
+    .why-head { display: grid; padding-block: 0 18px; }
+    .why-head::before { display: none; }
+    .why-orbit-head { color: var(--fg); }
+    .why-after { font-size: 18px; }
+  }
+
   .mobile { overflow-x: clip; }
   .mobile-head { display: flex; flex-direction: column; align-items: center; text-align: center; }
   .mobile-head .h2 { margin-top: 20px; }
   .mobile-head .lead { margin-top: 20px; }
-  .fan { --pw: 260px; position: relative; height: calc((var(--pw) - 20px) * 2.1641 + 20px + 72px); margin-top: 56px; }
+  .fan { --pw: 260px; position: relative; height: calc((var(--pw) - 20px) * 2.1641 + 20px + 112px); margin-top: 56px; }
   .fan :global(.fan-phone) { position: absolute; top: 48px; left: 50%; width: var(--pw); margin-left: calc(var(--pw) / -2); }
-  .fan :global(.fan-left) { transform: translateX(-72%) rotate(-6deg); z-index: 1; display: none; }
-  .fan :global(.fan-right) { transform: translateX(72%) rotate(6deg); z-index: 1; display: none; }
-  .fan :global(.fan-center) { transform: translateY(-24px); z-index: 2; }
+  .fan :global(.fan-left) { transform: translateX(-58%) translateY(12px) rotate(-5deg) scale(0.94); z-index: 2; display: none; }
+  .fan :global(.fan-right) { transform: translateX(58%) translateY(12px) rotate(5deg) scale(0.94); z-index: 2; display: none; }
+  .fan :global(.fan-outer) { display: none; z-index: 1; filter: brightness(0.6); }
+  .fan :global(.fan-outer-left) { transform: translateX(-106%) translateY(40px) rotate(-9deg) scale(0.86); }
+  .fan :global(.fan-outer-right) { transform: translateX(106%) translateY(40px) rotate(9deg) scale(0.86); }
+  .fan :global(.fan-center) { transform: translateY(-24px); z-index: 3; }
   @media (min-width: 640px) {
     .fan { --pw: clamp(220px, 28vw, 300px); }
     .fan :global(.fan-left), .fan :global(.fan-right) { display: block; }
+  }
+  @media (min-width: 1100px) {
+    .fan { --pw: clamp(210px, 17vw, 250px); }
+    .fan :global(.fan-outer) { display: block; }
   }
 
   .facts { list-style: none; margin: 96px 0 0; padding: 0; display: grid; gap: 40px; }

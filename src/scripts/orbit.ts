@@ -7,6 +7,8 @@ export function initOrbits(reduced: boolean) {
   document.querySelectorAll<HTMLElement>("[data-orbit]").forEach((root) => {
     const planet = root.querySelector<HTMLElement>("[data-orbit-planet]");
     if (!planet) return;
+    const soft = planet.querySelector<HTMLElement>("[data-shade-soft]");
+    const hard = planet.querySelector<HTMLElement>("[data-shade-hard]");
 
     const place = (theta: number) => {
       const ox = ORBIT.rx * Math.cos(theta);
@@ -19,6 +21,14 @@ export function initOrbits(reduced: boolean) {
       planet.style.transform = `translate(-50%, -50%) scale(${0.7 + 0.45 * depth})`;
       planet.style.opacity = String(0.55 + 0.45 * depth);
       planet.style.zIndex = Math.sin(theta) > 0 ? "4" : "1";
+      // Lit by the black hole's disk: the shadow falls on the side facing away from the centre.
+      const dx = x - CENTER.x;
+      const dy = y - CENTER.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const ux = dx / len;
+      const uy = dy / len;
+      if (soft) soft.style.transform = `translate(${ux * 48}%, ${uy * 48}%)`;
+      if (hard) hard.style.transform = `translate(${ux * 75}%, ${uy * 75}%)`;
     };
 
     place(0.5);

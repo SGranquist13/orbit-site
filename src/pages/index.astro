@@ -291,6 +291,7 @@ const keyLabel = (k: string[]) => k.join(" ");
           <DitherReveal class="fan-phone fan-right" cell={4} delay={0.1}><PhoneFrame image={mobileDiff} alt="Orbit Mobile diff review." /></DitherReveal>
           <DitherReveal class="fan-phone fan-center" cell={4}><PhoneFrame video="mobile-tour" poster={mobileWorkspace} /></DitherReveal>
         </div>
+        <p class="fan-hint eyebrow" aria-hidden="true">Swipe for more screens</p>
         <ul class="facts">
           {
             facts.map((f) => (
@@ -404,7 +405,7 @@ const keyLabel = (k: string[]) => k.join(" ");
                           alt={c.media.alt}
                           formats={["avif", "webp"]}
                           widths={[1280, 1920, 2560]}
-                          sizes={`(min-width: 1024px) ${Math.round((894 * c.imgWidthPct) / 100)}px, ${Math.round(c.imgWidthPct)}vw`}
+                          sizes={`(min-width: 1024px) ${Math.round(c.imgWidthPct * 0.62)}vw, ${Math.round(c.imgWidthPct)}vw`}
                           loading="lazy"
                           decoding="async"
                           style={`width:${c.imgWidthPct.toFixed(3)}%;left:-${c.left.toFixed(3)}%;top:-${c.top.toFixed(3)}%`}
@@ -487,7 +488,7 @@ const keyLabel = (k: string[]) => k.join(" ");
   .art { position: relative; display: flex; justify-content: center; height: var(--art); pointer-events: none; }
   .window-wrap { position: relative; z-index: 10; margin-top: calc(var(--art) * -0.42); }
   @media (max-width: 639px) { .window-wrap { margin-top: calc(var(--art) * -0.5); } }
-  .window-stage { position: relative; perspective: 1600px; max-width: 1200px; margin-inline: auto; }
+  .window-stage { position: relative; perspective: 1600px; max-width: var(--container); margin-inline: auto; }
   .window-stage :global([data-hero-window]) { will-change: transform; }
 
   /* About 35% of the phone's width sits past the window's right edge, 10% of its height past the bottom. */
@@ -501,7 +502,7 @@ const keyLabel = (k: string[]) => k.join(" ");
   /* ---------- Statement ---------- */
   .statement { padding-top: 64px; }
   .statement-text {
-    max-width: 960px; margin: 0; font-size: clamp(28px, 3.6vw, 48px); font-weight: 540;
+    max-width: min(1120px, 70vw); margin: 0; font-size: clamp(28px, 3.6vw, var(--statement-max, 48px)); font-weight: 540;
     letter-spacing: -0.03em; line-height: 1.18; color: var(--fg); text-wrap: pretty;
   }
 
@@ -728,5 +729,40 @@ const keyLabel = (k: string[]) => k.join(" ");
   .cta-inner .lead { margin-top: 20px; }
   .cta-inner .ctas { margin-top: 36px; }
   @media (max-width: 639px) { .cta { padding-bottom: 240px; } .cta-horizon { height: 320px; } }
+
+  /* Large displays: component text steps up with the wider layout. */
+  @media (min-width: 1600px) {
+    .body { font-size: 18px; max-width: 580px; }
+    .ch-title { font-size: 36px; }
+    .ch-lead { font-size: 19px; }
+    .feat h4 { font-size: 17.5px; }
+    .feat p { font-size: 16px; }
+    .index-row { font-size: 16px; }
+    .why-before { font-size: 17px; }
+    .why-after { font-size: 19.5px; }
+    .why-row { grid-template-columns: 240px 1fr 1.2fr; }
+  }
+
+  /* Phones: the fan becomes a swipeable row of all five screens, sized so a whole phone fits short viewports. */
+  @media (max-width: 639px) {
+    .fan {
+      --pw: min(62vw, 240px, calc((64svh - 20px) / 2.1641 + 20px));
+      height: auto; margin-top: 40px; margin-inline: calc(var(--gutter) * -1);
+      display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+      padding: 8px calc(50vw - var(--pw) / 2) 20px; scrollbar-width: none;
+    }
+    .fan::-webkit-scrollbar { display: none; }
+    .fan :global(.fan-phone) {
+      position: relative; top: auto; left: auto; margin: 0; flex: none; width: var(--pw);
+      display: block !important; transform: none !important; filter: none !important; scroll-snap-align: center;
+    }
+    .fan :global(.fan-center) { order: 1; }
+    .fan :global(.fan-left) { order: 2; }
+    .fan :global(.fan-right) { order: 3; }
+    .fan :global(.fan-outer-left) { order: 4; }
+    .fan :global(.fan-outer-right) { order: 5; }
+    .fan-hint { display: block; }
+  }
+  .fan-hint { display: none; margin: 4px 0 0; text-align: center; color: var(--mute); }
 </style>
 

@@ -30,8 +30,8 @@ const pct = (n: number) => `${n * 100}%`;
       vector-effect="non-scaling-stroke"></ellipse>
   </svg>
   <span data-orbit-planet class="planet" style={`width:${pct(PLANET)};height:${pct(PLANET)};left:${pct(CENTER.x + ORBIT.rx)};top:${pct(CENTER.y)}`}>
-    <span class="dither-50 shade" style="transform:translate(38%,30%)"></span>
-    <span class="shade solid" style="transform:translate(58%,48%)"></span>
+    <span class="dither-50 shade" data-shade-soft style="transform:translate(38%,30%)"></span>
+    <span class="shade solid" data-shade-hard style="transform:translate(58%,48%)"></span>
   </span>
   <span
     class="horizon"

@@ -155,17 +155,7 @@ if (features) {
       pin: true,
       onUpdate: (self) => activate(Math.min(steps - 1, Math.floor(self.progress * steps))),
     });
-    /* Screenshot drift: each step's image pans up 3% of its height across its own step, scrubbed to the pin.
-       Scaled to 1.06 so a 3% pan in either direction never shows an edge. */
-    const drift = gsap.timeline({
-      scrollTrigger: { trigger: pin, start: "top top", end: () => "+=" + window.innerHeight * 0.8 * steps, scrub: 0.6 },
-    });
-    slides.forEach((slide, k) => {
-      const img = slide.querySelector<HTMLElement>("img");
-      if (!img) return;
-      gsap.set(img, { scale: 1.06 });
-      drift.fromTo(img, { yPercent: 0 }, { yPercent: -3, ease: "none", duration: 1 }, k);
-    });
+    // No zoom or pan on the screenshots: they are full app windows, and any crop cuts off the app's own chrome.
     return () => {
       trigger = null;
     };
@@ -339,29 +329,17 @@ if (everything) {
     }
 
     chapters.forEach((ch) => {
-      /* Media: scrubbed clip reveal on the crop box, so the frame keeps its border and shadow. */
-      const crop = ch.querySelector<HTMLElement>("[data-crop]");
-      if (crop) {
-        gsap.fromTo(
-          crop,
-          { clipPath: "inset(6% 6% 6% 6% round 14px)", scale: 0.98 },
-          {
-            clipPath: "inset(0% 0% 0% 0% round 14px)",
-            scale: 1,
-            ease: "none",
-            scrollTrigger: { trigger: crop, start: "top 92%", end: "top 55%", scrub: 0.6 },
-          },
-        );
-      }
-      /* Chapter screenshot: image drifts from +1.5% to -1.5% of its height while the frame crosses the viewport. Scale 1.03 covers the travel. */
-      const chCrop = ch.querySelector<HTMLElement>("[data-crop]");
-      const chImg = chCrop?.querySelector<HTMLElement>("img");
-      if (chCrop && chImg) {
-        gsap.fromTo(
-          chImg,
-          { yPercent: 1.5, scale: 1.03 },
-          { yPercent: -1.5, scale: 1.03, ease: "none", scrollTrigger: { trigger: chCrop, start: "top bottom", end: "bottom top", scrub: 0.6 } },
-        );
+      /* Media: the whole window fades up once as it enters. The crops are tight, so nothing inside
+         the frame is clipped, zoomed or panned: the screenshot always shows exactly its crop. */
+      const frame = ch.querySelector<HTMLElement>(".ch-frame");
+      if (frame) {
+        gsap.set(frame, { opacity: 0, y: 32 });
+        ScrollTrigger.create({
+          trigger: frame,
+          start: "top 88%",
+          once: true,
+          onEnter: () => gsap.to(frame, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }),
+        });
       }
       /* Features fade up once, 40ms apart. */
       const feats = ch.querySelectorAll<HTMLElement>(".feat");

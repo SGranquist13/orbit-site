@@ -18,8 +18,9 @@ const links = [
       <Image src={mark} alt="" width={28} height={28} densities={[1, 2]} format="png" class="mark" />
       <span>orbit</span>
     </a>
-    <nav class="links" aria-label="Primary">
+    <nav class="links" aria-label="Primary" data-nav-links>
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      <span class="nav-ind" data-nav-ind aria-hidden="true"></span>
     </nav>
     <Button href={UPDATES_URL} variant="secondary" size="sm" aria-label="Follow Orbit launch updates">
       <GithubMark size={15} />
@@ -43,9 +44,15 @@ const links = [
   .bar { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--fg); font-weight: 600; font-size: 20px; letter-spacing: -0.03em; }
   .brand :global(.mark) { width: 28px; height: 28px; border-radius: 6px; mix-blend-mode: lighten; }
-  .links { display: flex; gap: 32px; margin-left: auto; margin-right: 32px; }
+  .links { position: relative; display: flex; gap: 32px; margin-left: auto; margin-right: 32px; }
   .links a { font-size: 14px; font-weight: 450; color: var(--dim); transition: color .15s; }
-  .links a:hover { color: var(--fg); }
+  .links a:hover, .links a[data-current] { color: var(--fg); }
+  /* One underline shared by all links; motion.ts moves it to the section in view. */
+  .nav-ind {
+    position: absolute; left: 0; bottom: -8px; width: 0; height: 1px; background: var(--fg); opacity: 0;
+    pointer-events: none; transition: transform .35s cubic-bezier(.22, 1, .36, 1), opacity .25s;
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-ind { transition: none; } }
   @media (max-width: 767px) { .links { display: none; } }
 </style>
 

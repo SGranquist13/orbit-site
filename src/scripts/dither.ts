@@ -136,3 +136,41 @@ export function initDitherReveals(reduced: boolean) {
     else ScrollTrigger.create({ trigger: host, start: "top 85%", once: true, onEnter: run });
   });
 }
+
+/** Edge fade for the marquee: --bg cells in Bayer order, solid at the very edge, gone ~15% in. */
+export function initDitherEdges() {
+  document.querySelectorAll<HTMLCanvasElement>("canvas[data-dither-edges]").forEach((c) => {
+    const paint = () => {
+      const cell = 3;
+      const w = Math.max(1, Math.ceil(c.clientWidth / cell));
+      const h = Math.max(1, Math.ceil(c.clientHeight / cell));
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext("2d");
+      if (!ctx) return;
+      const img = ctx.createImageData(w, h);
+      const [r, g, b] = hex(cssVar("--bg", "#050506"));
+      const fade = Math.min(w * 0.18, 220 / cell);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const d = Math.min(x, w - 1 - x);
+          const v = 1 - d / fade; // 1 at the edge, 0 at `fade` cells in
+          if (v <= 0 || v < (BAYER8[y & 7][x & 7] + 0.5) / 64) continue;
+          const k = (y * w + x) * 4;
+          img.data[k] = r;
+          img.data[k + 1] = g;
+          img.data[k + 2] = b;
+          img.data[k + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    };
+    let lastW = 0;
+    new ResizeObserver(() => {
+      if (c.clientWidth !== lastW) {
+        lastW = c.clientWidth;
+        paint();
+      }
+    }).observe(c);
+  });
+}

@@ -31,18 +31,25 @@ export function initOrbits(reduced: boolean) {
     const tick = (now: number) => {
       elapsed += now - last;
       last = now;
-      place((elapsed / PERIOD_MS) * Math.PI * 2);
+      place(0.5 + (elapsed / PERIOD_MS) * Math.PI * 2);
       frame = requestAnimationFrame(tick);
     };
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !visible) {
+    let inView = false;
+    const update = () => {
+      const shouldRun = inView && !document.hidden;
+      if (shouldRun && !visible) {
         visible = true;
         last = performance.now();
         frame = requestAnimationFrame(tick);
-      } else if (!e.isIntersecting && visible) {
+      } else if (!shouldRun && visible) {
         visible = false;
         cancelAnimationFrame(frame);
       }
+    };
+    new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting;
+      update();
     }).observe(root);
+    document.addEventListener("visibilitychange", update);
   });
 }

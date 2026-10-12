@@ -1,5 +1,6 @@
 ---
-import { Image, Picture } from "astro:assets";
+import { Picture } from "astro:assets";
+import type { ImageMetadata } from "astro";
 import Layout from "../components/Layout.astro";
 import Nav from "../components/Nav.astro";
 import Button from "../components/Button.astro";
@@ -12,20 +13,21 @@ import WindowFrame from "../components/WindowFrame.astro";
 import PhoneFrame from "../components/PhoneFrame.astro";
 import Kbd from "../components/Kbd.astro";
 import Footer from "../components/Footer.astro";
+import Marquee from "../components/Marquee.astro";
 import { UPDATES_URL } from "../config";
-import cropContext from "../assets/crops/context.png";
-import cropSession from "../assets/crops/session.png";
-import cropSync from "../assets/crops/sync.png";
-import lightWs from "../assets/raw/orbit-light-workspace.png";
-import workspace from "../assets/raw/orbit-dark-workspace.png";
-import inbox from "../assets/raw/orbit-dark-inbox.png";
-import ship from "../assets/raw/orbit-dark-ship.png";
-import palette from "../assets/raw/orbit-dark-palette.png";
-import issues from "../assets/raw/orbit-dark-issues.png";
-import routines from "../assets/raw/orbit-dark-routines.png";
-import mobileWorkspace from "../assets/raw/mobile-workspace.png";
-import mobileInbox from "../assets/raw/mobile-inbox.png";
-import mobileDiff from "../assets/raw/mobile-diff.png";
+import { chapters, featureCount } from "../data/features";
+
+// Every capture in src/assets/raw (kept in sync with the manifest by scripts/sync-media.mjs).
+const raw = import.meta.glob<{ default: ImageMetadata }>("../assets/raw/*.png", { eager: true });
+const shot = (name: string): ImageMetadata => {
+  const m = raw[`../assets/raw/${name}`];
+  if (!m) throw new Error(`Missing capture: ${name}. Run node scripts/sync-media.mjs`);
+  return m.default;
+};
+const workspace = shot("orbit-dark-workspace.png");
+const mobileWorkspace = shot("mobile-workspace.png");
+const mobileInbox = shot("mobile-inbox.png");
+const mobileDiff = shot("mobile-diff.png");
 
 const statement =
   "Agents are fast. Waiting on them isn't. Orbit runs every task in its own worktree and tells you the moment one needs you: a question, a failed check, a finished pull request.";
@@ -36,37 +38,53 @@ const features = [
     title: "One task, one worktree.",
     body: "Start a workspace and Orbit cuts a fresh branch and worktree for it. Claude Code and Codex run side by side in their own checkouts, with live diff stats in the sidebar.",
     kbd: ["Ctrl N"],
-    media: [{ img: workspace, alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats." }],
+    img: workspace,
+    alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats.",
   },
   {
     title: "Only what needs you.",
     body: "The inbox collects every agent that asked a question, failed, or finished, plus any pull request with red checks. Suggested replies are one keystroke away.",
     kbd: ["Ctrl I", "J", "K", "E", "S"],
-    media: [{ img: inbox, alt: "Orbit inbox listing agents that asked, failed, or finished." }],
+    img: shot("orbit-dark-inbox.png"),
+    alt: "Orbit inbox listing agents that asked, failed, or finished.",
   },
   {
     title: "From fix to merge in one panel.",
     body: "Ship shows the draft PR, check status, review state, and every changed file. Fix CI and Address comments hand the failure straight back to the agent.",
     kbd: ["Ctrl ."],
-    media: [{ img: ship, alt: "Orbit Ship panel with the draft pull request, checks and changed files." }],
+    img: shot("orbit-dark-ship.png"),
+    alt: "Orbit Ship panel with the draft pull request, checks and changed files.",
   },
   {
     title: "Agents with a job description.",
     body: "Builder, Debugger, Planner, Reviewer, Shipper. Read-only profiles are blocked from writing at the tool layer, not asked nicely in a prompt. Add skill packs from any git URL.",
     kbd: ["Ctrl K"],
-    media: [{ img: palette, alt: "Orbit command palette." }],
+    img: shot("orbit-dark-palette-profiles.png"),
+    alt: "Orbit command palette listing agent profiles.",
   },
   {
     title: "Work starts from the backlog.",
-    body: "Pull in GitHub issues and press Enter to start one in a fresh workspace. Routines send messages on a schedule while Orbit is open, like triage at nine and checks at two.",
+    body: "Pull in GitHub issues and press Enter to start one in a fresh workspace, or P to have a Planner write the plan first.",
     kbd: ["Ctrl Shift G"],
-    media: [
-      { img: issues, alt: "Orbit issues view." },
-      { img: routines, alt: "Orbit routines view." },
-    ],
+    img: shot("orbit-dark-issues.png"),
+    alt: "Orbit issues view.",
+  },
+  {
+    title: "Work that runs while you sleep.",
+    body: "Routines send a message on a schedule: triage at nine, checks at two, a sweep of stale branches on Fridays. Runs with nothing to do archive themselves.",
+    kbd: ["Ctrl Shift E"],
+    img: shot("orbit-dark-routine-editor.png"),
+    alt: "Orbit routine editor with a prompt, schedule and templates.",
+  },
+  {
+    title: "Simpler code, same behaviour.",
+    body: "Simplify reads what changed, lists what could be simpler, and applies one candidate at a time. Each one is checked and committed as a refactor, or put back.",
+    kbd: [] as string[],
+    img: shot("orbit-dark-simplify-applying.png"),
+    alt: "Orbit Simplify panel applying refactor candidates one at a time.",
   },
 ];
-const slides = features.flatMap((f, step) => f.media.map((m, sub) => ({ ...m, step, sub })));
+const total = String(features.length).padStart(2, "0");
 
 const steps = [
   { title: "Add a repo.", line: "Point Orbit at any git repository on your machine." },
@@ -79,6 +97,32 @@ const facts = [
   { label: "LIVE", line: "Transcripts stream as the agent works." },
   { label: "IN CONTROL", line: "Send a message or stop a turn from your phone." },
 ];
+
+// "Everything in Orbit": crop geometry. The box aspect follows the crop; the image is scaled to fill it.
+const SRC = { w: 2560, h: 1600 };
+const PHONE = { w: 1170, h: 2532 };
+const chapterMedia = chapters.map((c) => {
+  const [l, t, w, h] = c.media.crop ?? [0, 0, 100, 100];
+  return {
+    ...c,
+    img: shot(c.media.shot),
+    phoneImg: c.media.phone ? shot(c.media.phone) : undefined,
+    aspect: (w * SRC.w) / (h * SRC.h),
+    imgWidthPct: 10000 / w,
+    left: (l / w) * 100,
+    top: (t / h) * 100,
+    cropW: w,
+  };
+});
+const areas = chapters.length;
+const apps = 2;
+void PHONE;
+const stats = [
+  { n: featureCount, label: "FEATURES" },
+  { n: areas, label: "AREAS" },
+  { n: apps, label: "APPS (DESKTOP + IPHONE)" },
+];
+const keyLabel = (k: string[]) => k.join(" ");
 ---
 
 <Layout>
@@ -144,6 +188,9 @@ const facts = [
       </div>
     </section>
 
+    <!-- FEATURE MARQUEE -->
+    <Marquee />
+
     <!-- FEATURES: pinned story -->
     <section id="features" class="section features" data-features>
       <div class="feat-pin" data-feat-pin>
@@ -164,9 +211,7 @@ const facts = [
                         <p class="body">{f.body}</p>
                         <div class="kbds"><Kbd keys={f.kbd} /></div>
                         <div class="item-media">
-                          {f.media.map((m) => (
-                            <WindowFrame image={m.img} alt={m.alt} />
-                          ))}
+                          <WindowFrame image={f.img} alt={f.alt} />
                         </div>
                       </div>
                     </div>
@@ -174,13 +219,13 @@ const facts = [
                 ))
               }
             </ol>
-            <div class="counter" aria-hidden="true"><span data-feat-count>01</span> / 05</div>
+            <div class="counter" aria-hidden="true"><span data-feat-count>01</span> / {total}</div>
           </div>
           <div class="feat-right">
             <div class="feat-field" aria-hidden="true"><DitherField cell={3} strength={0.5} power={1.4} /></div>
             <WindowFrame class="feat-window" alt="">
               {
-                slides.map((m, k) => (
+                features.map((m, k) => (
                   <div class="slide" data-feat-slide data-active={k === 0 ? "" : undefined}>
                     <Picture src={m.img} alt={m.alt} formats={["avif", "webp"]} widths={[1280, 1920, 2560]} sizes="(min-width: 1344px) 700px, 60vw" loading="lazy" />
                   </div>
@@ -245,58 +290,113 @@ const facts = [
       </div>
     </section>
 
-    <!-- DETAILS -->
-    <section id="details" class="section details">
+    <!-- EVERYTHING IN ORBIT -->
+    <section id="everything" class="section everything" data-everything>
       <div class="container">
-        <Eyebrow>DETAILS</Eyebrow>
-        <h2 class="h2 sec-h2">Built for the long session.</h2>
-        <div class="tiles">
-          <article class="tile t-context">
-            <div class="tile-media"><Image src={cropContext} alt="Context meter reading 85%, 170k of 200k tokens." widths={[640, 1000]} sizes="(min-width: 1024px) 690px, 100vw" /></div>
-            <div class="tile-text">
-              <Eyebrow class="tile-label">CONTEXT METER</Eyebrow>
-              <p>See the context window fill up, and compact before it's full.</p>
-            </div>
-          </article>
-          <article class="tile t-session">
-            <div class="tile-media"><Image src={cropSession} alt="Turn summary: 1m 14s, 19k tokens, $0.21." widths={[480, 960]} sizes="(min-width: 1024px) 480px, 100vw" /></div>
-            <div class="tile-text">
-              <Eyebrow class="tile-label">SESSIONS RESUME</Eyebrow>
-              <p>Close Orbit mid-run. Every session picks up where it left off.</p>
-            </div>
-          </article>
-          <article class="tile t-paper">
-            <div class="tile-media split" data-split>
-              <Picture src={lightWs} alt="Orbit in the light theme." formats={["avif", "webp"]} widths={[640, 1280]} sizes="(min-width: 1024px) 480px, 100vw" class="layer" />
-              <div class="dark-layer" data-split-dark>
-                <Picture src={workspace} alt="Orbit in the dark theme." formats={["avif", "webp"]} widths={[640, 1280]} sizes="(min-width: 1024px) 480px, 100vw" class="layer" />
+        <Eyebrow>EVERYTHING IN ORBIT</Eyebrow>
+        <h2 class="h2 sec-h2">Every feature, already built.<br /> <span class="mute">Here's the whole list.</span></h2>
+        <dl class="stats" data-stats>
+          {
+            stats.map((s) => (
+              <div class="stat">
+                <dt class="eyebrow stat-label">{s.label}</dt>
+                <dd class="stat-num" data-count={s.n}>{s.n}</dd>
               </div>
-              <svg class="seam" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <line data-split-line x1="62" y1="0" x2="38" y2="100" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"></line>
-              </svg>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="container ev-wrap">
+        <!-- Mobile and tablet: sticky chip bar -->
+        <nav class="chips" data-chips aria-label="Chapters">
+          <div class="chips-track" data-chips-track>
+            {
+              chapterMedia.map((c, i) => (
+                <a class="chip" href={`#ch-${c.id}`} data-chip={c.id} data-active={i === 0 ? "" : undefined}>{c.title}</a>
+              ))
+            }
+          </div>
+        </nav>
+
+        <div class="ev-grid">
+          <!-- Desktop: sticky chapter index -->
+          <aside class="index" aria-label="Chapters">
+            <div class="index-inner">
+              <div class="index-progress" aria-hidden="true"><span data-index-fill></span></div>
+              <ol>
+                {
+                  chapterMedia.map((c, i) => (
+                    <li>
+                      <a class="index-row" href={`#ch-${c.id}`} data-index={c.id} data-active={i === 0 ? "" : undefined}>
+                        <span class="index-idx">{String(i + 1).padStart(2, "0")}</span>
+                        <span class="index-title">{c.title}</span>
+                        <span class="index-count">{c.features.length}</span>
+                      </a>
+                    </li>
+                  ))
+                }
+              </ol>
             </div>
-            <div class="tile-text">
-              <Eyebrow class="tile-label">PAPER AND VOID</Eyebrow>
-              <p>A light theme and a dark theme, both greyscale, so status colour always means something.</p>
-            </div>
-          </article>
-          <article class="tile t-sync">
-            <div class="tile-media"><Image src={cropSync} alt="Inbox row: Migrate billing schema, needs sync, conflicts with base." widths={[690, 1380]} sizes="(min-width: 1024px) 690px, 100vw" /></div>
-            <div class="tile-text">
-              <Eyebrow class="tile-label">KEEPS UP WITH MAIN</Eyebrow>
-              <p>Branches sync with base automatically, and conflicts reach your inbox.</p>
-            </div>
-          </article>
-          <article class="tile t-keys">
-            <div class="tile-media keys" aria-hidden="true">
-              <div class="keys-row"><kbd class="kbd kbd-lg">Ctrl K</kbd><kbd class="kbd kbd-lg">Ctrl I</kbd></div>
-              <div class="keys-row shift"><kbd class="kbd kbd-lg">Ctrl N</kbd><kbd class="kbd kbd-lg">Ctrl .</kbd><kbd class="kbd kbd-lg">J</kbd><kbd class="kbd kbd-lg">K</kbd></div>
-            </div>
-            <div class="tile-text">
-              <Eyebrow class="tile-label">KEYBOARD FIRST</Eyebrow>
-              <p>Every view has a shortcut.</p>
-            </div>
-          </article>
+          </aside>
+
+          <div class="chapters">
+            {
+              chapterMedia.map((c, i) => (
+                <article class="chapter" id={`ch-${c.id}`} data-chapter={c.id}>
+                  <header class="ch-head">
+                    <div class="ch-title-row">
+                      <span class="ch-idx">{String(i + 1).padStart(2, "0")}</span>
+                      <h3 class="ch-title">{c.title}</h3>
+                    </div>
+                    <p class="ch-lead">{c.lead}</p>
+                  </header>
+
+                  {c.phoneImg ? (
+                    <div class="ch-phones" role="img" aria-label={c.media.alt}>
+                      <DitherReveal class="ch-phone" cell={4}><PhoneFrame image={c.img} alt="" /></DitherReveal>
+                      <DitherReveal class="ch-phone" cell={4} delay={0.15}><PhoneFrame image={c.phoneImg} alt="" /></DitherReveal>
+                    </div>
+                  ) : (
+                    <WindowFrame class="ch-frame" style={`aspect-ratio:${c.aspect.toFixed(4)}`}>
+                      <div class="ch-crop" data-crop>
+                        <Picture
+                          src={c.img}
+                          alt={c.media.alt}
+                          formats={["avif", "webp"]}
+                          widths={[1280, 1920, 2560]}
+                          sizes={`(min-width: 1024px) ${Math.round((894 * c.imgWidthPct) / 100)}px, ${Math.round(c.imgWidthPct)}vw`}
+                          loading="lazy"
+                          decoding="async"
+                          style={`width:${c.imgWidthPct.toFixed(3)}%;left:-${c.left.toFixed(3)}%;top:-${c.top.toFixed(3)}%`}
+                        />
+                      </div>
+                    </WindowFrame>
+                  )}
+
+                  <ul class="ch-grid" data-feats>
+                    {c.features.map((f) => (
+                      <li class="feat">
+                        <div class="dither-rule"></div>
+                        <div class="feat-title">
+                          <h4>{f.title}</h4>
+                          {f.tag && <span class="tag">{f.tag}</span>}
+                        </div>
+                        <p>{f.body}</p>
+                        {f.keys && (
+                          <div class="feat-keys">
+                            {f.keys.map((k) => (
+                              <kbd class="kbd">{keyLabel(k)}</kbd>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))
+            }
+          </div>
         </div>
       </div>
     </section>
@@ -309,7 +409,14 @@ const facts = [
         </DitherReveal>
       </div>
       <div class="container cta-inner">
-        <DitherReveal cell={4}><OrbitArt size={168} /></DitherReveal>
+        <div class="cta-art">
+          <div class="field-wrap" aria-hidden="true">
+            <DitherField cell={3} strength={0.7} power={1.5} />
+          </div>
+          <div class="art">
+            <DitherReveal cell={4} class="cta-orbit"><OrbitArt size="var(--art)" /></DitherReveal>
+          </div>
+        </div>
         <h2 class="h2">Run your next ten tasks in parallel.</h2>
         <p class="lead">Orbit is in development. Desktop and mobile open-source repos coming soon. Follow launch updates and share what you want to build.</p>
         <div class="ctas">
@@ -363,7 +470,10 @@ const facts = [
   .features { overflow-x: clip; padding-top: 64px; }
   .feat-grid { display: block; }
   .feat-h2 { margin-top: 20px; font-size: clamp(34px, 3.4vw, 46px); }
-  .feat-h2 span { display: block; text-wrap: balance; }
+  .feat-h2 > span { display: block; text-wrap: balance; }
+  /* Headline line masks (built by motion.ts). */
+  :global(.h2 .hl) { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+  :global(.h2 .hl-in) { display: block; }
   .feat-list { list-style: none; margin: 40px 0 0; padding: 0; display: grid; gap: 56px; }
   .item-head {
     display: flex; align-items: baseline; gap: 16px; width: 100%; padding: 0; margin: 0; background: none; border: 0;
@@ -462,46 +572,92 @@ const facts = [
     .step-text { margin-top: 6px; }
   }
 
-  /* ---------- Details ---------- */
-  .tiles { margin-top: 64px; display: grid; gap: 16px; grid-template-columns: 1fr; }
-  .tile { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
-  .tile-media { position: relative; flex: 1; min-height: 140px; background: var(--bg); display: flex; align-items: center; overflow: hidden; border-bottom: 1px solid var(--line); }
-  .tile-media :global(img) { width: 100%; height: auto; display: block; }
-  .tile-text { padding: 20px 24px 24px; }
-  .tile-text :global(.tile-label) { color: var(--fg); }
-  .tile-text p { margin: 12px 0 0; max-width: 44ch; text-wrap: pretty; }
+  /* ---------- Everything in Orbit ---------- */
+  .everything { overflow-x: clip; }
+  .stats { display: flex; flex-wrap: wrap; gap: 32px 72px; margin: 64px 0 0; padding: 0; }
+  .stat { margin: 0; }
+  .stat-label { display: block; margin: 0; order: 2; }
+  .stat { display: flex; flex-direction: column-reverse; gap: 14px; }
+  .stat-num {
+    margin: 0; font: 500 clamp(44px, 6.2vw, 84px)/1 var(--font-mono); letter-spacing: -0.04em; color: var(--fg);
+    font-variant-numeric: tabular-nums; will-change: transform;
+  }
+  .ev-wrap { margin-top: 96px; }
+  .ev-grid { display: block; }
 
-  .t-context .tile-media { align-items: flex-end; }
-  .t-session .tile-media { align-items: flex-start; }
-  .t-session .tile-media :global(img) { margin-top: 16px; }
-  .t-sync .tile-media { min-height: 120px; }
+  .chips {
+    position: sticky; top: 64px; z-index: 40; margin-inline: calc(var(--gutter) * -1); padding: 12px var(--gutter);
+    background: color-mix(in srgb, var(--bg) 80%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px dotted var(--line-strong);
+  }
+  .chips-track { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .chips-track::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; padding: 8px 14px; border-radius: 9999px; border: 1px solid var(--line-strong); font: 500 13px/1 var(--font-sans);
+    color: var(--mute); white-space: nowrap; transition: color .2s, background-color .2s, border-color .2s;
+  }
+  .chip[data-active] { color: var(--fg); background: var(--raised); border-color: var(--mute); }
+  .index { display: none; }
 
-  .split { min-height: 360px; align-items: stretch; --s: 50%; }
-  .tile-media.split :global(picture), .tile-media.split :global(img), .dark-layer { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .tile-media.split :global(img) { object-fit: cover; object-position: 0% 0%; }
-  .dark-layer { clip-path: polygon(calc(var(--s) + 14%) 0, 100% 0, 100% 100%, calc(var(--s) - 14%) 100%); }
-  .seam { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--mute); pointer-events: none; }
+  .chapters { display: grid; gap: 88px; padding-top: 48px; }
+  .chapter { scroll-margin-top: 140px; }
+  .ch-title-row { display: flex; align-items: baseline; gap: 16px; }
+  .ch-idx { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; color: var(--mute); }
+  .ch-title { margin: 0; font-size: clamp(26px, 2.4vw, 32px); font-weight: 540; letter-spacing: -0.03em; line-height: 1.1; color: var(--fg); }
+  .ch-lead { margin: 14px 0 0; font-size: 18px; line-height: 1.5; color: var(--dim); max-width: 600px; text-wrap: pretty; }
 
-  .keys { flex-direction: column; justify-content: center; gap: 18px; padding: 44px 24px; background:
-    radial-gradient(circle at 0.5px 0.5px, var(--line) 0.5px, transparent 0.75px) 0 0 / 8px 8px, var(--bg); }
-  .keys-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: center; }
-  .keys-row.shift { transform: translateX(28px); }
+  .chapter :global(.ch-frame) { margin-top: 32px; width: 100%; }
+  .ch-crop { position: absolute; inset: 0; overflow: hidden; }
+  .ch-crop :global(picture) { display: contents; }
+  .ch-crop :global(img) { position: absolute; max-width: none; height: auto; }
+
+  .ch-phones { display: flex; justify-content: center; gap: 20px; margin-top: 32px; }
+  .ch-phones :global(.ch-phone) { width: min(280px, calc((100% - 20px) / 2)); }
+
+  .ch-grid { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: 1fr; column-gap: 40px; }
+  .feat { padding: 0 0 28px; }
+  .feat .dither-rule { margin-bottom: 24px; }
+  .feat-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+  .feat h4 { margin: 0; font-size: 16px; font-weight: 540; letter-spacing: -0.01em; line-height: 1.35; color: var(--fg); }
+  .tag { font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); border: 1px solid var(--line-strong); border-radius: 9999px; padding: 4px 8px; }
+  .feat p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--dim); text-wrap: pretty; }
+  .feat-keys { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 
   @media (min-width: 1024px) {
-    .tiles { grid-template-columns: repeat(12, 1fr); gap: 20px; }
-    .t-context { grid-column: 1 / span 7; }
-    .t-session { grid-column: 8 / span 5; }
-    .t-paper { grid-column: 1 / span 5; grid-row: 2 / span 2; }
-    .t-sync { grid-column: 6 / span 7; }
-    .t-keys { grid-column: 6 / span 7; }
+    .chips { display: none; }
+    .ev-grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: start; }
+    .index { display: block; grid-column: 1 / span 3; position: sticky; top: 96px; align-self: start; }
+    .chapters { grid-column: 4 / span 9; gap: 120px; padding-top: 0; }
+    .chapter { scroll-margin-top: 96px; }
+    .ch-grid { grid-template-columns: repeat(2, 1fr); }
+    .index-inner { position: relative; padding-left: 20px; }
+    .index-progress { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--line); }
+    .index-progress span { display: block; width: 100%; height: 100%; background: var(--fg); transform: scaleY(0); transform-origin: top; }
+    .index ol { list-style: none; margin: 0; padding: 0; }
+    .index-row { position: relative; display: flex; align-items: baseline; gap: 12px; padding: 9px 0; color: var(--mute); font-size: 15px; font-weight: 450; transition: color .25s; }
+    .index-row:hover { color: var(--dim); }
+    .index-row[data-active] { color: var(--fg); }
+    .index-row::before { content: ""; position: absolute; left: -20px; top: 6px; bottom: 6px; width: 2px; background: var(--fg); transform: scaleY(0); transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+    .index-row[data-active]::before { transform: scaleY(1); }
+    .index-idx { font: 500 12px/1 var(--font-mono); letter-spacing: 0.08em; width: 20px; flex: none; }
+    .index-title { flex: 1; }
+    .index-count { font: 500 12px/1 var(--font-mono); color: var(--mute); }
   }
-  @media (max-width: 639px) { .keys-row.shift { transform: none; } .keys :global(.kbd-lg) { font-size: 16px; padding: 10px 14px; } }
+  @media (max-width: 639px) {
+    .stats { gap: 28px 40px; }
+    .ch-phones { gap: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chip, .index-row, .index-row::before { transition: none; }
+  }
+
 
   /* ---------- Final CTA ---------- */
-  .cta { position: relative; overflow: clip; padding-top: var(--section-y); padding-bottom: 300px; margin-top: var(--section-y); }
+  .cta { --art: min(520px, 78vw); position: relative; overflow: clip; padding-top: var(--section-y); padding-bottom: 300px; margin-top: var(--section-y); }
   .cta-horizon { position: absolute; left: 0; right: 0; bottom: 0; height: 420px; z-index: 0; pointer-events: none; }
   .cta-horizon :global(.cta-reveal) { position: absolute; inset: 0; }
   .cta-inner { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .cta-art { position: relative; width: 100%; }
   .cta-inner .h2 { margin-top: 32px; max-width: 14em; }
   .cta-inner .lead { margin-top: 20px; }
   .cta-inner .ctas { margin-top: 36px; }

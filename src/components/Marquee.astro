@@ -1,0 +1,73 @@
+---
+import { chapters } from "../data/features";
+
+// Deterministic shuffle (mulberry32) so the build is stable.
+const titles = chapters.flatMap((c) => c.features.map((f) => f.title));
+let seed = 0x0b17;
+const rand = () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const shuffled = [...titles];
+for (let i = shuffled.length - 1; i > 0; i--) {
+  const j = Math.floor(rand() * (i + 1));
+  [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+}
+const half = Math.ceil(shuffled.length / 2);
+const status = ["run", "ok", "info", "merged"];
+// Every 7th pixel (counting across both rows) takes a status colour.
+const rows = [shuffled.slice(0, half), shuffled.slice(half)].map((row, r) =>
+  row.map((title, i) => {
+    const n = r * half + i + 1;
+    return { title, tone: n % 7 === 0 ? status[(n / 7 - 1) % 4] : null };
+  }),
+);
+---
+
+<section class="marquee" aria-label="A sample of what Orbit does" data-marquee>
+  <div class="dither-rule"></div>
+  <div class="rows">
+    {
+      rows.map((row, r) => (
+        <div class:list={["row", r === 1 && "rev"]} data-marquee-row>
+          <div class="track">
+            {[0, 1].map((copy) => (
+              <ul class="set" aria-hidden={copy === 1 ? "true" : undefined}>
+                {row.map((it) => (
+                  <li>
+                    <span>{it.title}</span>
+                    <i class:list={["px", it.tone && `t-${it.tone}`]}></i>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+    <canvas class="edges" data-dither-edges aria-hidden="true"></canvas>
+  </div>
+  <div class="dither-rule"></div>
+</section>
+
+<style>
+  .marquee { position: relative; padding-block: 0; }
+  .rows { position: relative; display: grid; gap: 14px; padding-block: 32px; overflow: hidden; }
+  .row { overflow: hidden; }
+  .track { display: flex; width: max-content; animation: drift var(--dur, 360s) linear infinite; will-change: transform; }
+  .rev .track { animation-direction: reverse; }
+  .rows:hover .track { animation-play-state: paused; }
+  .marquee:not([data-running]) .track { animation-play-state: paused; }
+  .set { display: flex; flex: none; list-style: none; margin: 0; padding: 0; }
+  .set li { display: flex; align-items: center; flex: none; font-size: 15px; font-weight: 500; line-height: 24px; color: var(--mute); white-space: nowrap; }
+  .px { display: block; width: 6px; height: 6px; margin-inline: 28px; background: var(--line-strong); flex: none; }
+  .t-run { background: var(--run); }
+  .t-ok { background: var(--ok); }
+  .t-info { background: var(--info); }
+  .t-merged { background: var(--merged); }
+  .edges { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; z-index: 2; }
+  @keyframes drift { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .track { animation: none; } .row { padding-left: 64px; } }
+</style>

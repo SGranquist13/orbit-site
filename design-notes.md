@@ -166,3 +166,87 @@ Tiles. Each holds a real crop from a screenshot via `object-position`, plus a mo
 - Video: `media/orbit-tour-{dark,light}.{mp4,webm}` (1920w, about 18s loop) and `media/mobile-tour.{mp4,webm}` (780w).
 - Brand: `media/brand/orbit-art.png` (black hole), `horizon.png`, `planet-surface.png`, `icon.png` (app icon, favicon source).
 - Regenerate with `scripts/capture-orbit.mjs`, `scripts/capture-mobile.mjs`, `scripts/record-orbit.mjs` and `scripts/record-mobile.mjs`. The Orbit UI must be on :1420 and the mobile web build on :8099.
+
+---
+
+## 7. v2 pass (2026-10-11): refreshed media and "Everything in Orbit"
+
+Goal: the page should tell a visitor **exactly what exists in Orbit today**, and be good enough to keep them scrolling. The quality bar is still a design studio. Every rule above still applies.
+
+### 7.1 Media refresh
+All captures were retaken on 2026-10-11 from the current app (`media/raw/`, 2560×1600 desktop and 1170×2532 phone) and include the new Simplify button, Routines and the full Settings page.
+- Replace every `src/assets/raw/*` image with the new file of the same name, and copy in the new ones the manifest uses (see `src/data/features.ts`, `media.shot` / `media.phone`).
+- Replace the hero video with `media/orbit-tour-dark-trim.{mp4,webm}` and the poster with `media/orbit-tour-dark-poster.jpg`. Replace the phone video with `media/mobile-tour.{mp4,webm}`.
+- Regenerate the Details crops from the new captures, or drop them; the manifest replaces that section.
+
+### 7.2 Pinned feature story: 5 → 7 steps
+Keep the mechanics. The steps are now:
+01. **One task, one worktree.** No change. Media: `orbit-dark-workspace.png`.
+02. **Only what needs you.** No change. Media: `orbit-dark-inbox.png`.
+03. **From fix to merge in one panel.** No change. Media: `orbit-dark-ship.png`.
+04. **Agents with a job description.** No change. Media: `orbit-dark-palette-profiles.png`.
+05. **Work starts from the backlog.** Body: Pull in GitHub issues and press Enter to start one in a fresh workspace, or P to have a Planner write the plan first. Media: `orbit-dark-issues.png`. Kbd: `Ctrl Shift G`.
+06. **Work that runs while you sleep.** Body: Routines send a message on a schedule: triage at nine, checks at two, a sweep of stale branches on Fridays. Runs with nothing to do archive themselves. Media: `orbit-dark-routine-editor.png`. Kbd: `Ctrl Shift E`.
+07. **Simpler code, same behaviour.** Body: Simplify reads what changed, lists what could be simpler, and applies one candidate at a time. Each one is checked and committed as a refactor, or put back. Media: `orbit-dark-simplify-applying.png`.
+- Counter reads `0N / 07`. The "Watch the tour" and nav links still land on the section.
+
+### 7.3 New section: the feature marquee (between Statement and Features)
+A slim, full-bleed band that hints at how much is coming.
+- Two rows of feature titles from `features.ts` (all 96, shuffled deterministically, split across rows), set in 15px Inter 500 in `--mute`, separated by a 6px square status pixel in `--line-strong`. Every 7th pixel uses a status colour (run/ok/info/merged) so the band twinkles like the app's sidebar.
+- The rows drift in opposite directions at about 30px/s, CSS-only (two duplicated tracks, `translateX` keyframes). Scroll velocity briefly speeds them up via GSAP (`timeScale` 1 → up to 4, eased back). Pause on hover. Under reduced motion it is static.
+- Edges fade into the background through a **dither falloff**, not an opacity gradient. Use a canvas Bayer mask, or overlay the edges with `--bg` dither cells.
+- Hairline dotted rules above and below. Height about 120px. No heading.
+
+### 7.4 Replace "Details" with "Everything in Orbit" (`#everything`)
+This is the centrepiece of the pass. Data: `src/data/features.ts` (13 chapters, 96 features). **Do not edit the copy.** Render it.
+
+**Intro**
+- Eyebrow `EVERYTHING IN ORBIT`.
+- H2: **Every feature, already built.** <mute>Here's the whole list.</mute>
+- Under it, a big stat row in JetBrains Mono: `96` FEATURES · `13` AREAS · `2` APPS (desktop + iPhone). Use the display size for the numbers in `--fg` and the 12px eyebrow style for the labels. The numbers count up from 0 once when the row enters the viewport (≈1.2s, `power2.out`). Compute them from the data; never hard-code.
+
+**Layout, desktop ≥1024**
+- Two columns.
+- **Left: sticky chapter index** (3/12, `top: 96px`). Each row is a mono index `01`–`13`, the chapter title, and its count right-aligned in `--mute`.
+  - The active chapter is `--fg` with a 2px bar. Inactive rows are `--mute`.
+  - A 1px progress line runs down the left edge of the index and fills (`scaleY`) as you scroll through the section.
+  - Clicking a row Lenis-scrolls to that chapter.
+- **Right: the chapters** (9/12). For each chapter:
+  1. A header row: mono `01` + the chapter title as H3 at about 32px/540/-0.03em, then the `lead` in `--dim` 18px.
+  2. The **media**: a `WindowFrame` showing the crop of `media.shot` defined by `media.crop` (percent of the source image: left, top, width, height).
+     - Implement the crop as an aspect-ratio box (aspect = crop w/h × source aspect) with the image absolutely positioned and scaled, so the crop fills the box. Use Astro `<Picture>` with widths [1280, 1920, 2560].
+     - Never show a crop at below 1:1 legibility on desktop. If the box gets too small, the crop is too big; tell me rather than shrinking text into mush.
+     - For `mobile`, render two `PhoneFrame`s side by side (`shot` and `phone`) instead of a window.
+  3. A **feature grid**: 2 columns on desktop. Each feature has:
+     - the title in 16px/540 `--fg`;
+     - the body in 15px/1.55 `--dim`;
+     - optional Kbd chips under the body;
+     - an optional tag (`Optional` / `Experimental`) as a 11px mono uppercase pill with a 1px `--line-strong` border, beside the title.
+     Separate rows with the dotted dither rule. No icons, no cards around each feature.
+- Spacing: 120px between chapters, 40px between media and grid, 28px between features vertically.
+
+**Layout, mobile/tablet <1024**
+- The index becomes a **sticky horizontal chip bar** under the nav: scrollable, with the active chip `--fg` on `--raised`. It auto-scrolls so the active chip stays in view.
+- Chapters stack, with media full width and the feature grid in 1 column.
+
+**Motion**
+- Each chapter's media gets a scrubbed clip reveal: `clip-path: inset(6% 6% 6% 6% round 14px)` → `inset(0 round 14px)` with scale 0.98→1 as it enters (scrub 0.6).
+- Features fade up 12px with a 40ms stagger, once, on enter.
+- The DitherReveal runs only on the Orbit Mobile phones in this section.
+- Everything respects reduced motion.
+
+**Performance**
+- 13 large screenshots. Lazy-load every chapter image (`loading="lazy"`, `decoding="async"`) and keep only the first chapter eager when it's near.
+- Check the total transferred weight for a full scroll and report it.
+
+### 7.5 Copy changes elsewhere
+- Hero eyebrow: `ORBIT 0.1 — DESKTOP + IPHONE` (no change).
+- Statement: unchanged.
+- The final CTA lead stays as the user set it. Don't change CTA copy or `src/config.ts`.
+
+### 7.6 QA (required before reporting)
+- Run `npm run build`. It must be clean.
+- Take Playwright screenshots at 1440, 1024, 768 and 390 into `media/qa/v2/`: the marquee band, the manifest intro with its stat row, at least 4 chapters (workspaces, ship, simplify, mobile), the sticky index mid-section, and the mobile chip bar.
+- Read every crop at 1440 and confirm the UI text is legible and that the crop shows what its `alt` says.
+- Check there is no horizontal scroll and no console errors.
+- Run once with Playwright `reducedMotion: "reduce"` and confirm every section shows its final state.

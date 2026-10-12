@@ -375,8 +375,15 @@ const setNav = (a: HTMLAnchorElement | null) => {
   navInd.style.transform = `translateX(${a.offsetLeft}px)`;
   navInd.style.opacity = "1";
 };
+const here = location.pathname.replace(/\/$/, "");
 navLinks.forEach((a) => {
-  const sec = document.querySelector<HTMLElement>(a.getAttribute("href") ?? "");
+  const samePage = a.pathname.replace(/\/$/, "") === here;
+  if (!samePage) return;
+  if (!a.hash) {
+    requestAnimationFrame(() => setNav(a));
+    return;
+  }
+  const sec = document.querySelector<HTMLElement>(a.hash);
   if (!sec) return;
   ScrollTrigger.create({
     trigger: sec,

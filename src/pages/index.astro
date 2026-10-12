@@ -15,6 +15,7 @@ import Kbd from "../components/Kbd.astro";
 import Footer from "../components/Footer.astro";
 import Marquee from "../components/Marquee.astro";
 import { UPDATES_URL } from "../config";
+import { asset } from "../lib/url";
 import { chapters, featureCount } from "../data/features";
 
 // Every capture in src/assets/raw (kept in sync with the manifest by scripts/sync-media.mjs).
@@ -105,6 +106,16 @@ const why = [
   { label: "YOUR STACK", before: "Another app, with its own account, its own model and its own bill.", orbit: "Your own Claude Code and Codex, on your machine and your accounts." },
 ];
 
+// FAQ: only answers we can stand behind today.
+const faq = [
+  { q: "Does my code leave my machine?", a: "Orbit itself doesn't upload it anywhere. Your agents talk to their own providers exactly as they do in a terminal, and pull requests go to GitHub through your own gh sign-in." },
+  { q: "Do I need a new subscription?", a: "No. Orbit runs the Claude Code and Codex CLIs you already have, on your existing accounts." },
+  { q: "Which agents does it support?", a: "Claude Code and Codex, side by side. Background tasks like inbox suggestions can also run on a local model through Ollama or any OpenAI-compatible server." },
+  { q: "How does the phone connect?", a: "Scan a QR code in Orbit's settings. After the pairing handshake every message is end-to-end encrypted, over your local network or Tailscale." },
+  { q: "What platforms does it run on?", a: "Orbit is built and tested on Windows today, with Orbit Mobile on iPhone. Follow launch updates for other platforms." },
+  { q: "When can I use it?", a: "Orbit is in development. Follow launch updates on GitHub to hear when the desktop and mobile repos open." },
+];
+
 const facts = [
   { label: "ENCRYPTED", line: "End-to-end encrypted after the pairing handshake." },
   { label: "LIVE", line: "Transcripts stream as the agent works." },
@@ -189,15 +200,6 @@ const keyLabel = (k: string[]) => k.join(" ");
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- STATEMENT -->
-    <section id="statement" class="section statement">
-      <div class="container">
-        <p class="statement-text" data-statement>
-          {words.map((w) => <><span class="word">{w}</span>{" "}</>)}
-        </p>
       </div>
     </section>
 
@@ -306,137 +308,50 @@ const keyLabel = (k: string[]) => k.join(" ");
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section id="how" class="section how" data-how>
+    <!-- AREAS: compact index of everything; the full list is on /features -->
+    <section id="areas" class="section areas">
       <div class="container">
-        <Eyebrow>HOW IT WORKS</Eyebrow>
-        <h2 class="h2 sec-h2">Three steps. <span class="mute">No new workflow to learn.</span></h2>
-        <ol class="steps">
+        <Eyebrow>EVERYTHING IN ORBIT</Eyebrow>
+        <h2 class="h2 sec-h2">{featureCount} features, already built.<br /> <span class="mute">Here's where they live.</span></h2>
+        <ol class="area-grid">
           {
-            steps.map((s, i) => (
-              <li class="step" data-step>
-                <div class="num-row">
-                  <span class="num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                  {i < steps.length - 1 && <span class="rule" aria-hidden="true"></span>}
-                </div>
-                <div class="step-text">
-                  <h3 class="h3">{s.title}</h3>
-                  <p>{s.line}</p>
-                </div>
+            chapters.map((c, i) => (
+              <li>
+                <a class="area" href={asset(`features/#ch-${c.id}`)}>
+                  <span class="area-top"><span class="area-n">{String(i + 1).padStart(2, "0")}</span><span class="area-count">{c.features.length}</span></span>
+                  <span class="area-title">{c.title}</span>
+                  <span class="area-lead">{c.lead}</span>
+                </a>
               </li>
             ))
           }
+          <li class="area-cta-cell">
+            <a class="area area-cta" href={asset("features/")}>
+              <span class="area-title">See every feature <span aria-hidden="true">→</span></span>
+              <span class="area-lead">All {featureCount}, with screenshots and shortcuts.</span>
+            </a>
+          </li>
         </ol>
       </div>
     </section>
 
-    <!-- EVERYTHING IN ORBIT -->
-    <section id="everything" class="section everything" data-everything>
-      <div class="container">
-        <Eyebrow>EVERYTHING IN ORBIT</Eyebrow>
-        <h2 class="h2 sec-h2">Every feature, already built.<br /> <span class="mute">Here's the whole list.</span></h2>
-        <dl class="stats" data-stats>
+    <!-- YOUR MACHINE + FAQ -->
+    <section id="faq" class="section faq">
+      <div class="container faq-grid">
+        <div class="faq-intro">
+          <Eyebrow>YOUR MACHINE, YOUR ACCOUNTS</Eyebrow>
+          <h2 class="h2 sec-h2">Nothing in between.</h2>
+          <p class="lead">Orbit drives the Claude Code and Codex you already use. Worktrees live on your disk, state lives in your home folder, and your phone talks to your desktop directly.</p>
+        </div>
+        <div class="faq-list">
           {
-            stats.map((s) => (
-              <div class="stat">
-                <dt class="eyebrow stat-label">{s.label}</dt>
-                <dd class="stat-num" data-count={s.n}>{s.n}</dd>
-              </div>
+            faq.map((q) => (
+              <details class="faq-item">
+                <summary><span>{q.q}</span><i class="faq-px" aria-hidden="true"></i></summary>
+                <p>{q.a}</p>
+              </details>
             ))
           }
-        </dl>
-      </div>
-
-      <div class="container ev-wrap">
-        <!-- Mobile and tablet: sticky chip bar -->
-        <nav class="chips" data-chips aria-label="Chapters">
-          <div class="chips-track" data-chips-track>
-            {
-              chapterMedia.map((c, i) => (
-                <a class="chip" href={`#ch-${c.id}`} data-chip={c.id} data-active={i === 0 ? "" : undefined}>{c.title}</a>
-              ))
-            }
-          </div>
-        </nav>
-
-        <div class="ev-grid">
-          <!-- Desktop: sticky chapter index -->
-          <aside class="index" aria-label="Chapters">
-            <div class="index-inner">
-              <div class="index-progress" aria-hidden="true"><span data-index-fill></span></div>
-              <ol>
-                {
-                  chapterMedia.map((c, i) => (
-                    <li>
-                      <a class="index-row" href={`#ch-${c.id}`} data-index={c.id} data-active={i === 0 ? "" : undefined}>
-                        <span class="index-idx">{String(i + 1).padStart(2, "0")}</span>
-                        <span class="index-title">{c.title}</span>
-                        <span class="index-count">{c.features.length}</span>
-                      </a>
-                    </li>
-                  ))
-                }
-              </ol>
-            </div>
-          </aside>
-
-          <div class="chapters">
-            {
-              chapterMedia.map((c, i) => (
-                <article class="chapter" id={`ch-${c.id}`} data-chapter={c.id}>
-                  <header class="ch-head">
-                    <div class="ch-title-row">
-                      <span class="ch-idx">{String(i + 1).padStart(2, "0")}</span>
-                      <h3 class="ch-title">{c.title}</h3>
-                    </div>
-                    <p class="ch-lead">{c.lead}</p>
-                  </header>
-
-                  {c.phoneImg ? (
-                    <div class="ch-phones" role="img" aria-label={c.media.alt}>
-                      <DitherReveal class="ch-phone" cell={4}><PhoneFrame image={c.img} alt="" /></DitherReveal>
-                      <DitherReveal class="ch-phone" cell={4} delay={0.15}><PhoneFrame image={c.phoneImg} alt="" /></DitherReveal>
-                    </div>
-                  ) : (
-                    <WindowFrame class="ch-frame" style={`aspect-ratio:${c.aspect.toFixed(4)}`}>
-                      <div class="ch-crop" data-crop>
-                        <Picture
-                          src={c.img}
-                          alt={c.media.alt}
-                          formats={["avif", "webp"]}
-                          widths={[1280, 1920, 2560]}
-                          sizes={`(min-width: 1024px) ${Math.round(c.imgWidthPct * 0.62)}vw, ${Math.round(c.imgWidthPct)}vw`}
-                          loading="lazy"
-                          decoding="async"
-                          style={`width:${c.imgWidthPct.toFixed(3)}%;left:-${c.left.toFixed(3)}%;top:-${c.top.toFixed(3)}%`}
-                        />
-                      </div>
-                    </WindowFrame>
-                  )}
-
-                  <ul class="ch-grid" data-feats>
-                    {c.features.map((f) => (
-                      <li class="feat">
-                        <div class="dither-rule"></div>
-                        <div class="feat-title">
-                          <h4>{f.title}</h4>
-                          {f.tag && <span class="tag">{f.tag}</span>}
-                        </div>
-                        <p>{f.body}</p>
-                        {f.keys && (
-                          <div class="feat-keys">
-                            {f.keys.map((k) => (
-                              <kbd class="kbd">{keyLabel(k)}</kbd>
-                            ))}
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))
-            }
-          </div>
         </div>
       </div>
     </section>
@@ -764,5 +679,42 @@ const keyLabel = (k: string[]) => k.join(" ");
     .fan-hint { display: block; }
   }
   .fan-hint { display: none; margin: 4px 0 0; text-align: center; color: var(--mute); }
+  /* Areas: compact index of the 13 chapters. */
+  .area-grid { list-style: none; margin: 56px 0 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .area-grid li { display: flex; }
+  .area { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 22px 22px 24px; background: var(--bg); color: inherit; text-decoration: none; transition: background-color .2s; }
+  .area:hover { background: var(--panel); }
+  .area-top { display: flex; justify-content: space-between; font-family: "JetBrains Mono Variable", monospace; font-size: 12px; color: var(--mute); }
+  .area-title { font-size: 17px; font-weight: 540; letter-spacing: -0.01em; color: var(--fg); }
+  .area-lead { font-size: 14.5px; line-height: 1.5; color: var(--dim); text-wrap: pretty; }
+  .area-cta { justify-content: flex-end; }
+  .area-cta .area-title { font-size: 19px; }
+  .area-cta:hover .area-title span { transform: translateX(4px); }
+  .area-cta .area-title span { display: inline-block; transition: transform .2s; }
+  /* Phones: a compact two-column index of titles; the one-liners live on /features. */
+  @media (max-width: 639px) {
+    .area-grid { grid-template-columns: repeat(2, 1fr); margin-top: 40px; }
+    .area { padding: 16px 14px 18px; gap: 6px; }
+    .area:not(.area-cta) .area-lead { display: none; }
+    .area-title { font-size: 15px; }
+    .area-cta .area-title { font-size: 15px; }
+    .area-cta .area-lead { font-size: 13px; }
+  }
+  @media (min-width: 1024px) { .area-cta-cell { grid-column: span 3; } }
+  @media (min-width: 640px) { .area-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .area-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  /* Your machine + FAQ */
+  .faq-grid { display: grid; gap: 48px; }
+  .faq-intro .lead { margin-top: 20px; }
+  .faq-item { border-top: 1px solid var(--line); }
+  .faq-item:last-child { border-bottom: 1px solid var(--line); }
+  .faq-item summary { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 22px 0; cursor: pointer; list-style: none; font-size: 17px; font-weight: 520; color: var(--fg); }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-px { flex: none; width: 8px; height: 8px; background: var(--line-strong); transition: background-color .2s, transform .2s; }
+  .faq-item[open] .faq-px { background: var(--fg); transform: rotate(45deg); }
+  .faq-item p { margin: 0 0 24px; max-width: 60ch; color: var(--dim); line-height: 1.6; }
+  @media (min-width: 1024px) { .faq-grid { grid-template-columns: 5fr 7fr; gap: 80px; align-items: start; } .faq-intro { position: sticky; top: 120px; } }
+
 </style>
 

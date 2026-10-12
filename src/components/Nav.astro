@@ -4,17 +4,20 @@ import mark from "../assets/brand/app-icon-desktop.png";
 import Button from "./Button.astro";
 import GithubMark from "./GithubMark.astro";
 import { UPDATES_URL } from "../config";
+import { asset } from "../lib/url";
 
+const home = asset("");
+const onHome = Astro.url.pathname.replace(/\/$/, "") === home.replace(/\/$/, "");
 const links = [
-  { href: "#features", label: "Product" },
-  { href: "#mobile", label: "Mobile" },
-  { href: "#how", label: "How it works" },
+  { href: onHome ? "#features" : `${home}#features`, label: "Product" },
+  { href: onHome ? "#mobile" : `${home}#mobile`, label: "Mobile" },
+  { href: asset("features/"), label: "Features" },
 ];
 ---
 
 <header data-nav class="nav">
   <div class="container-wide bar">
-    <a href="#top" class="brand" aria-label="Orbit home">
+    <a href={onHome ? "#top" : home} class="brand" aria-label="Orbit home">
       <Image src={mark} alt="" width={28} height={28} densities={[1, 2]} format="png" class="mark" />
       <span>orbit</span>
     </a>

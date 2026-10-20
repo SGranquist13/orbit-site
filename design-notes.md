@@ -250,3 +250,137 @@ This is the centrepiece of the pass. Data: `src/data/features.ts` (13 chapters, 
 - Read every crop at 1440 and confirm the UI text is legible and that the crop shows what its `alt` says.
 - Check there is no horizontal scroll and no console errors.
 - Run once with Playwright `reducedMotion: "reduce"` and confirm every section shows its final state.
+
+## 8. v3 pass: Code view, teammates, new key map (2026-10-19)
+
+### Where things stand
+
+- **The IDE work is on `main` in `agentic_ide`, and it is merged and committed.** Code view landed 10/18. VS Code keybindings and live Write/Edit drafts landed today. Nothing is uncommitted there. The `typing` worktree sits at the same commit as main.
+- **The site was last synced to FEATURES.md on 10/12** (`features.ts`, 13 chapters). Since then the app has gained three things the site never mentions:
+  1. **Code view**, the built-in IDE (FEATURES.md §"Code view", all ✅/🟢).
+  2. **AI teammates**, with Chief, hand-offs, memory and owned routines (§"AI teammates", ✅/🟢). It has zero mentions on the site.
+  3. **VS Code keybindings**, rebindable, with Ctrl+K chords.
+- **Many shortcuts on the site are now wrong.** The keybindings commit moved them:
+
+  | Action | Site says | App now |
+  |---|---|---|
+  | Command palette | Ctrl K | **Ctrl Shift P** / F1 (Ctrl K is now a chord prefix) |
+  | Ship panel | Ctrl . | **Ctrl Shift G** |
+  | Issues | Ctrl Shift G | **Alt 5** |
+  | Routines | Ctrl Shift E | **Alt 3** (Ctrl Shift E now opens the Code explorer) |
+  | Inbox | Ctrl I | **Alt 1** (Ctrl I is now Ask about selection in the editor) |
+  | Focus mode | Ctrl \ | **Ctrl K Z** |
+  | Theme | Ctrl Shift L | **Ctrl K Ctrl T** |
+  | Code view | — | **Alt 2** / Ctrl Shift E |
+  | Teammates | — | **Alt 4** |
+
+  `scripts/capture-orbit.mjs` and `record-orbit.mjs` press the old keys, so they will capture the wrong screens until they're fixed.
+- **Every existing screenshot is stale.** The sidebar and nav now include Code and Teammates, so every capture is out of date, not just the new features.
+- **Mobile:** `ide_mobile` has uncommitted icon and splash work. Its new FEATURES rows (dashboard, tabs, file edits) are already on the site. Nothing new to document; only re-shoot the phone screens if the new icon shows in them.
+- Uncommitted in this repo from an earlier session: `scripts/demo-orbit.mjs`, `capture-mobile.mjs`, `record-mobile.mjs`, and `video/`. I'll leave them alone unless you say otherwise.
+
+### Scope
+
+### 1. `src/data/features.ts`: two new chapters, fixes elsewhere
+
+These are built features only, using the same voice as the existing copy (short title, one plain sentence).
+
+**New chapter: Code view** (`id: "code"`, lead: *"An editor that watches the agent work."*). Place it after Agents and chat.
+- Open any folder: a repo, any workspace's worktree, or a folder on disk. `Alt 2`
+- A real editor: CodeMirror, themed for Void and Paper, with quick open, find and replace, and go to line. `Ctrl P`
+- Watch mode: follows the agent to the file it's editing, reloads as the edit lands, and flashes the changed lines.
+- Activity timeline: every turn's edits with +/− counts. Click any one to diff it against the turn's start.
+- Manual mode: no following. If a file you're editing changes on disk, choose Reload, Keep mine or Compare.
+- Ask about selection: send the selected lines and a question to the workspace's agent. `Ctrl I`
+- Integrated terminal: several tabs, your shell. `` Ctrl ` ``
+- Project search: regex, case, whole word and globs, with results grouped by file. `Ctrl Shift F`
+- Git gutter and diffs, against HEAD or the base branch.
+- Open in Code from the chat header, the Ship panel's changed files, or the palette.
+- Editor settings: font, tabs, wrap, autosave, and whether to follow the agent.
+
+**New chapter: Teammates** (`id: "teammates"`, lead: *"Hand work to a teammate, get a report back."*). Place it after Profiles and skills.
+- Give a teammate a task in chat. It opens its own workspaces and reports back with links and a result. `Alt 4`
+- Starter team: Chief, Builder, Debugger, Planner, Reviewer, Shipper and Ticket writer.
+- Make your own teammates, or override a starter one and reset it later.
+- Memory: each teammate keeps a notes file it reads and adds to. You can edit it.
+- Chief splits a vague request into parts with a plan card (Start all, Edit, Cancel). Dependent parts start once the parts they need finish, and you get one combined report.
+- Hand-offs: a finished report suggests the next teammate (Planner → Builder → Reviewer → Shipper), or use "Hand to…".
+- Teammates can own routines. Each run shows in their thread as a Scheduled task.
+- Avatars, with a status dot and a needs-you badge.
+- Never merges: teammates stop at a draft PR.
+
+**Other chapter edits**
+- *Agents and chat*: add **Live file drafts** (Write and Edit stream into the chat as the agent types them; I'll confirm in the mock what the UI shows) and **Watch an agent** (the picker).
+- *Look and keys*: replace "Command palette" with **VS Code keybindings**: the default map, Ctrl+K chords, and rebinding in Settings with conflict detection. Fix every Kbd chip using the table above.
+- Fix the Kbd chips in every other chapter too (inbox, ship, issues, routines).
+- Total goes from 96 to about 118 features in 15 areas. The stat row and marquee compute this themselves.
+
+### 2. Homepage (`src/pages/index.astro`)
+
+The homepage was trimmed in `d420b89`, so I'm not proposing more sections. Changes:
+- **Pinned story: 7 steps to 8.** See open question A.
+  - New step **"Watch it write."**: Code view in Watch mode, with the editor following the agent, flashed lines and the Activity timeline. Media: `orbit-dark-code-watch.png`. Kbd `Alt 2`.
+  - New step **"A team, not a prompt."**: Chief's plan card, with parts going to Builder and Reviewer. It absorbs "Agents with a job description" (profiles become teammates). Media: `orbit-dark-teammates-chief.png`. Kbd `Alt 4`.
+  - Drop **"Work starts from the backlog"** (Issues) from the story. It stays on /features.
+  - New order: worktree → watch it write → inbox → team → ship → routines → simplify → (mobile stays its own section).
+- Fix the Kbd chips on every step to the new map.
+- **Feature section H2** ("One window for the whole fleet. Start it, steer it, ship it."): unchanged, but make sure the hero/feature screenshot is re-shot with the new nav.
+- **Why Orbit**: add one line on not leaving for another editor ("Watch the diff land in a real editor, not a chat bubble"). I'll draft it; you approve the copy.
+- **FAQ**: add "Do I still need VS Code?" (Orbit has an editor and terminal built in, and Open in Code; keep your editor for the deep stuff) and "What are teammates?" Draft copy goes into the plan once approved.
+- The Areas grid and marquee update automatically from the data.
+
+### 3. Screenshots and video
+
+**Capture-script fixes first** (`scripts/capture-orbit.mjs`): new key map, plus navigating views with `Alt 1`–`5` instead of the old shortcuts.
+
+**Re-shoot all existing `orbit-dark-*` captures** against today's mock (`bun run dev` in `agentic_ide`, :1420).
+
+**New captures** (dark; light only where a chapter needs it):
+| File | What it shows |
+|---|---|
+| `orbit-dark-code-watch.png` | Code view mid-turn (`simulateCodeTurn`): agent strip, flashed lines, gutter marks, Activity timeline |
+| `orbit-dark-code-diff.png` | Per-turn diff opened from the timeline |
+| `orbit-dark-code-terminal.png` | Terminal panel + project search results |
+| `orbit-dark-code-ask.png` | Ask about selection popover |
+| `orbit-dark-teammates.png` | Teammates view: list + a thread with a report and hand-off chips |
+| `orbit-dark-teammates-chief.png` | Chief plan card with parts and dependencies |
+| `orbit-dark-teammate-editor.png` | Teammate editor (avatar picker, Memory tab) |
+| `orbit-dark-settings-keys.png` | New keybindings settings (recorder, search, chords) |
+
+Then run `scripts/sync-media.mjs`, and set the chapter crops for the two new chapters at 1:1 legibility (§7.4 rule).
+
+**Tour video** (`orbit-tour-dark.mp4`): re-record with `record-orbit.mjs` so it includes a few seconds of Code Watch mode and a teammate report. See open question C.
+
+### 4. QA (same bar as §7.6)
+- `npm run build` is clean.
+- Playwright shots at 1440/1024/768/390 into `media/qa/v3/`: the new story steps, both new chapters, the chip bar with 15 chips, and the FAQ.
+- Read every new crop at 1440 for legibility and check it matches its `alt`.
+- Check for no horizontal scroll, no console errors, and that reduced motion shows final states.
+- Grep the built site for every old shortcut string (`Ctrl .`, `Ctrl Shift L`, `Ctrl \`) and confirm none are left.
+- Don't commit or push until you've reviewed it.
+
+### How the work splits (Sonnet agents, I review)
+
+| # | Agent | Task | Depends on |
+|---|---|---|---|
+| 1 | Sonnet | Fix `capture-orbit.mjs` and add the new capture steps, then shoot all captures from the mock | — |
+| 2 | Sonnet | `features.ts`: two new chapters, Kbd fixes, Agents/Look edits | — (copy above) |
+| 3 | Sonnet | `index.astro`: story to 8 steps, Kbd fixes, Why line, FAQ | 1 (media names), 2 |
+| 4 | Sonnet | Re-record the tour video | 1 |
+| 5 | Me | Review screenshots against the real app, check crops and copy, run QA, report weight | all |
+
+1 and 2 run in parallel. 3 starts once the captures exist. Before each handoff I review the output with screenshots.
+
+### Open questions for you
+
+A. **Story length.** I propose 8 steps (add Watch + Team, drop Issues, fold Profiles into Team). The alternative is to keep 7 and also drop Simplify, or go to 9 and keep everything.
+B. **Hero.** Keep the workspace chat as the hero shot, or lead with Code view in Watch mode? The second is the most visually distinct thing Orbit does now.
+C. **Video.** Re-record the tour now, or ship the stills first and do the video in a second pass?
+D. **Status bar for 🟢 (mock-verified) features.** The last sync included them as built. Same rule now? Manual mode, Settings > Editor, the keybinding recorder and avatars are 🟢.
+E. **FEATURES.md mismatch.** The Code view entry says `Ctrl+Shift+O`, but the keymap binds `Alt 2` / `Ctrl Shift E`. I'll use the keymap unless you say otherwise. You may want to fix FEATURES.md.
+
+### As shipped
+- The story stayed at 7 steps: it added Watch it write and A team, not a prompt, and dropped Issues and the profiles step.
+- The built-in IDE got headline billing: hero and meta copy, an #ide section with the code-terminal shot, and an IDE nav link.
+- The Areas CTA cell spans whatever the last grid row leaves empty, computed from the chapter count.
+- Hero choice: the workspace video stays (re-shot stills only; the tour video was not re-recorded).

@@ -5,8 +5,8 @@ import { readFileSync, copyFileSync, readdirSync, rmSync, mkdirSync } from "node
 const manifest = readFileSync("src/data/features.ts", "utf8");
 const fromManifest = [...manifest.matchAll(/(?:shot|phone):\s*"([^"]+\.png)"/g)].map((m) => m[1]);
 const pinned = [
-  "orbit-dark-workspace.png", "orbit-dark-inbox.png", "orbit-dark-ship.png", "orbit-dark-palette-profiles.png",
-  "orbit-dark-issues.png", "orbit-dark-routine-editor.png", "orbit-dark-simplify-applying.png",
+  "orbit-dark-workspace.png", "orbit-dark-code-terminal.png", "orbit-dark-code-watch.png", "orbit-dark-inbox.png", "orbit-dark-teammates-chief.png",
+  "orbit-dark-ship.png", "orbit-dark-routine-editor.png", "orbit-dark-simplify-applying.png",
   "mobile-workspace.png", "mobile-inbox.png", "mobile-diff.png",
 ];
 const wanted = new Set([...fromManifest, ...pinned]);

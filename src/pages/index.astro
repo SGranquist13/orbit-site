@@ -45,37 +45,37 @@ const features = [
     alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats.",
   },
   {
+    title: "Watch it write.",
+    body: "Open Code view on any workspace and the editor follows the agent. New files type in as they are written and each edit flashes. An Activity timeline diffs every turn.",
+    kbd: ["Alt 2"],
+    img: shot("orbit-dark-code-watch.png"),
+    alt: "Orbit Code view following an agent, with flashed edits and the Activity timeline.",
+  },
+  {
     title: "Only what needs you.",
     body: "The inbox collects every agent that asked a question, failed, or finished, plus any pull request with red checks. Suggested replies are one keystroke away.",
-    kbd: ["Ctrl I", "J", "K", "E", "S"],
+    kbd: ["Alt 1", "J", "K", "E", "S"],
     img: shot("orbit-dark-inbox.png"),
     alt: "Orbit inbox listing agents that asked, failed, or finished.",
   },
   {
+    title: "A team, not a prompt.",
+    body: "Hand a task to a teammate and get a report back. Chief splits a vague request into parts for Builder, Debugger and Reviewer, and nothing starts until you press Start all. Read-only roles like Planner and Reviewer are blocked from writing at the tool layer.",
+    kbd: ["Alt 4"],
+    img: shot("orbit-dark-teammates-chief.png"),
+    alt: "Orbit Teammates view with Chief's plan card splitting a request into parts.",
+  },
+  {
     title: "From fix to merge in one panel.",
     body: "Ship shows the draft PR, check status, review state, and every changed file. Fix CI and Address comments hand the failure straight back to the agent.",
-    kbd: ["Ctrl ."],
+    kbd: ["Ctrl Shift G"],
     img: shot("orbit-dark-ship.png"),
     alt: "Orbit Ship panel with the draft pull request, checks and changed files.",
   },
   {
-    title: "Agents with a job description.",
-    body: "Builder, Debugger, Planner, Reviewer, Shipper. Read-only profiles are blocked from writing at the tool layer, not asked nicely in a prompt. Add skill packs from any git URL.",
-    kbd: ["Ctrl K"],
-    img: shot("orbit-dark-palette-profiles.png"),
-    alt: "Orbit command palette listing agent profiles.",
-  },
-  {
-    title: "Work starts from the backlog.",
-    body: "Pull in GitHub issues and press Enter to start one in a fresh workspace, or P to have a Planner write the plan first.",
-    kbd: ["Ctrl Shift G"],
-    img: shot("orbit-dark-issues.png"),
-    alt: "Orbit issues view.",
-  },
-  {
     title: "Work that runs while you sleep.",
     body: "Routines send a message on a schedule: triage at nine, checks at two, a sweep of stale branches on Fridays. Runs with nothing to do archive themselves.",
-    kbd: ["Ctrl Shift E"],
+    kbd: ["Alt 3"],
     img: shot("orbit-dark-routine-editor.png"),
     alt: "Orbit routine editor with a prompt, schedule and templates.",
   },
@@ -101,6 +101,7 @@ const why = [
   { label: "KNOWING WHEN", before: "You check every tab to find the one that's stuck.", orbit: "The inbox lists only what needs you, with a suggested reply one keystroke away." },
   { label: "SHIPPING", before: "The agent stops at a diff. The PR, the CI and the merge are on you.", orbit: "Ship opens the PR, Fix CI chases red checks, and merge waits for green." },
   { label: "STAYING CLEAN", before: "Branches drift, collide and pile up.", orbit: "Save points, auto-sync onto main, overlap warnings, and cleanup after merge." },
+  { label: "READING THE CODE", before: "The diff lands in a chat bubble, and you open another editor to read it.", orbit: "Watch the diff land in a real editor as the agent writes, with a timeline of every turn." },
   { label: "GUARDRAILS", before: "“Please don't edit anything,” written in the prompt.", orbit: "Read-only roles, blocked at the tool layer." },
   { label: "AWAY FROM THE DESK", before: "Work stalls the moment you walk away.", orbit: "Answer, steer or stop any agent from your phone, end-to-end encrypted." },
   { label: "YOUR STACK", before: "Another app, with its own account, its own model and its own bill.", orbit: "Your own Claude Code and Codex, on your machine and your accounts." },
@@ -110,10 +111,19 @@ const why = [
 const faq = [
   { q: "Does my code leave my machine?", a: "Orbit itself doesn't upload it anywhere. Your agents talk to their own providers exactly as they do in a terminal, and pull requests go to GitHub through your own gh sign-in." },
   { q: "Do I need a new subscription?", a: "No. Orbit runs the Claude Code and Codex CLIs you already have, on your existing accounts." },
+  { q: "Do I still need VS Code?", a: "Orbit has an editor, terminal, project search and diffs built in, with VS Code keybindings, so you can read and change what the agent wrote without leaving. There is also Open in Code. Keep your own editor for anything else." },
+  { q: "What are teammates?", a: "Named agents with a role, a memory and a thread. You hand them tasks, they open workspaces and draft pull requests, and they report back. For a bigger request, Chief splits it into parts for the others." },
   { q: "Which agents does it support?", a: "Claude Code and Codex, side by side. Background tasks like inbox suggestions can also run on a local model through Ollama or any OpenAI-compatible server." },
   { q: "How does the phone connect?", a: "Scan a QR code in Orbit's settings. After the pairing handshake every message is end-to-end encrypted, over your local network or Tailscale." },
   { q: "What platforms does it run on?", a: "Orbit is built and tested on Windows today, with Orbit Mobile on iPhone. Follow launch updates for other platforms." },
   { q: "When can I use it?", a: "Orbit is in development. Follow launch updates on GitHub to hear when the desktop and mobile repos open." },
+];
+
+const ideShot = shot("orbit-dark-code-terminal.png");
+const ideFacts = [
+  { label: "WATCH MODE", line: "The editor follows the agent from file to file and flashes every edit as it lands." },
+  { label: "TERMINAL", line: "Real shells in tabs, opened in the workspace's worktree." },
+  { label: "SEARCH AND DIFFS", line: "Project search, a git gutter, and a diff for every agent turn." },
 ];
 
 const facts = [
@@ -139,6 +149,8 @@ const chapterMedia = chapters.map((c) => {
   };
 });
 const areas = chapters.length;
+// The "See every feature" cell fills whatever the last row of the grid leaves empty.
+const ctaSpan = (cols: number) => cols - (areas % cols) || cols;
 const apps = 2;
 void PHONE;
 const stats = [
@@ -161,7 +173,7 @@ const keyLabel = (k: string[]) => k.join(" ");
           <span data-hero-in class="line mute">Ship from anywhere.</span>
         </h1>
         <p class="lead" data-hero-in>
-          Orbit is a desktop IDE for Claude Code and Codex. Every task gets its own worktree, branch, and agent, so ten things can move at once without stepping on each other.
+          Orbit is a desktop IDE for Claude Code and Codex, with a real editor and terminal built in. Every task gets its own worktree, branch, and agent, so ten things can move at once without stepping on each other.
         </p>
         <div class="ctas" data-hero-in>
           <Button href={UPDATES_URL}>
@@ -252,6 +264,33 @@ const keyLabel = (k: string[]) => k.join(" ");
       </div>
     </section>
 
+    <!-- IDE: the built-in editor and terminal -->
+    <section id="ide" class="section ide">
+      <div class="container mobile-head">
+        <Eyebrow>CODE VIEW</Eyebrow>
+        <h2 class="h2">A full IDE, built in. <span class="mute">Terminal included.</span></h2>
+        <p class="lead">
+          Open any repo or worktree in an editor with VS Code keybindings, a file explorer, project search and integrated terminals. Watch the agent edit in real time, then take over without switching apps.
+        </p>
+      </div>
+      <div class="container-wide ide-window">
+        <DitherReveal cell={4}>
+          <WindowFrame image={ideShot} alt="Orbit's Code view: file explorer, an editor with the agent's changes marked in the gutter, a terminal panel, and the agent's activity timeline." />
+        </DitherReveal>
+        <ul class="facts">
+          {
+            ideFacts.map((f) => (
+              <li class="fact">
+                <div class="dither-rule"></div>
+                <Eyebrow class="fact-label">{f.label}</Eyebrow>
+                <p>{f.line}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
     <!-- WHY ORBIT -->
     <section id="why" class="section why" data-why>
       <div class="container">
@@ -325,7 +364,7 @@ const keyLabel = (k: string[]) => k.join(" ");
               </li>
             ))
           }
-          <li class="area-cta-cell">
+          <li class="area-cta-cell" style={`--span-2: ${ctaSpan(2)}; --span-4: ${ctaSpan(4)}`}>
             <a class="area area-cta" href={asset("features/")}>
               <span class="area-title">See every feature <span aria-hidden="true">→</span></span>
               <span class="area-lead">All {featureCount}, with screenshots and shortcuts.</span>
@@ -496,6 +535,8 @@ const keyLabel = (k: string[]) => k.join(" ");
     .why-after { font-size: 18px; }
   }
 
+  .ide-window { margin-top: 64px; }
+  @media (max-width: 639px) { .ide-window { margin-top: 40px; } }
   .mobile { overflow-x: clip; }
   .mobile-head { display: flex; flex-direction: column; align-items: center; text-align: center; }
   .mobile-head .h2 { margin-top: 20px; }
@@ -700,7 +741,8 @@ const keyLabel = (k: string[]) => k.join(" ");
     .area-cta .area-title { font-size: 15px; }
     .area-cta .area-lead { font-size: 13px; }
   }
-  @media (min-width: 1024px) { .area-cta-cell { grid-column: span 3; } }
+  .area-cta-cell { grid-column: span var(--span-2); }
+  @media (min-width: 1024px) { .area-cta-cell { grid-column: span var(--span-4); } }
   @media (min-width: 640px) { .area-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .area-grid { grid-template-columns: repeat(4, 1fr); } }
 

@@ -3,7 +3,7 @@ import { Image } from "astro:assets";
 import mark from "../assets/brand/app-icon-desktop.png";
 import Button from "./Button.astro";
 import GithubMark from "./GithubMark.astro";
-import { UPDATES_URL } from "../config";
+import { GITHUB_URL } from "../config";
 import { asset } from "../lib/url";
 
 const home = asset("");
@@ -26,9 +26,9 @@ const links = [
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
       <span class="nav-ind" data-nav-ind aria-hidden="true"></span>
     </nav>
-    <Button href={UPDATES_URL} variant="secondary" size="sm" aria-label="Follow Orbit launch updates">
+    <Button href={GITHUB_URL} variant="secondary" size="sm" aria-label="Orbit on GitHub">
       <GithubMark size={15} />
-      <span>Follow</span>
+      <span>GitHub</span>
     </Button>
   </div>
   <div class="dither-rule rule"></div>

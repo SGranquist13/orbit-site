@@ -14,7 +14,7 @@ import PhoneFrame from "../components/PhoneFrame.astro";
 import Kbd from "../components/Kbd.astro";
 import Footer from "../components/Footer.astro";
 import Marquee from "../components/Marquee.astro";
-import { UPDATES_URL } from "../config";
+import { GITHUB_URL, RELEASES_URL } from "../config";
 import { asset } from "../lib/url";
 import { chapters, featureCount } from "../data/features";
 
@@ -115,8 +115,8 @@ const faq = [
   { q: "What are teammates?", a: "Named agents with a role, a memory and a thread. You hand them tasks, they open workspaces and draft pull requests, and they report back. For a bigger request, Chief splits it into parts for the others." },
   { q: "Which agents does it support?", a: "Claude Code and Codex, side by side. Background tasks like inbox suggestions can also run on a local model through Ollama or any OpenAI-compatible server." },
   { q: "How does the phone connect?", a: "Scan a QR code in Orbit's settings. After the pairing handshake every message is end-to-end encrypted, over your local network or Tailscale." },
-  { q: "What platforms does it run on?", a: "Orbit is built and tested on Windows today, with Orbit Mobile on iPhone. Follow launch updates for other platforms." },
-  { q: "When can I use it?", a: "Orbit is in development. Follow launch updates on GitHub to hear when the desktop and mobile repos open." },
+  { q: "What platforms does it run on?", a: "Orbit 0.1 is built and tested on Windows, with an installer on GitHub. Orbit Mobile for iPhone is still in development and not released yet." },
+  { q: "When can I use it?", a: "Now. Orbit is open source under the MIT license. Download the Windows installer from the latest release, or build it from source." },
 ];
 
 const ideShot = shot("orbit-dark-code-terminal.png");
@@ -176,13 +176,13 @@ const keyLabel = (k: string[]) => k.join(" ");
           Orbit is a desktop IDE for Claude Code and Codex, with a real editor and terminal built in. Every task gets its own worktree, branch, and agent, so ten things can move at once without stepping on each other.
         </p>
         <div class="ctas" data-hero-in>
-          <Button href={UPDATES_URL}>
+          <Button href={GITHUB_URL}>
             <GithubMark size={18} />
-            Follow launch updates
+            View on GitHub
           </Button>
-          <Button href="#features" variant="secondary">
-            <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6-10 6z"></path></svg>
-            Watch the tour
+          <Button href={RELEASES_URL} variant="secondary">
+            <svg width="12" height="13" viewBox="0 0 12 13" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 1v8M2.5 5.5 6 9l3.5-3.5M1 12h10"></path></svg>
+            Download for Windows
           </Button>
         </div>
       </div>
@@ -412,10 +412,10 @@ const keyLabel = (k: string[]) => k.join(" ");
           </div>
         </div>
         <h2 class="h2">Run your next ten tasks in parallel.</h2>
-        <p class="lead">Orbit is in development. Desktop and mobile open-source repos coming soon. Follow launch updates and share what you want to build.</p>
+        <p class="lead">Orbit is open source under the MIT license. Download the Windows installer, or build it from source. Orbit Mobile is still in development.</p>
         <div class="ctas">
-          <Button href={UPDATES_URL}><GithubMark size={18} />Follow launch updates</Button>
-          <Button href="#mobile" variant="secondary">Explore Orbit Mobile</Button>
+          <Button href={GITHUB_URL}><GithubMark size={18} />View on GitHub</Button>
+          <Button href={RELEASES_URL} variant="secondary"><svg width="12" height="13" viewBox="0 0 12 13" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 1v8M2.5 5.5 6 9l3.5-3.5M1 12h10"></path></svg>Download for Windows</Button>
         </div>
       </div>
     </section>

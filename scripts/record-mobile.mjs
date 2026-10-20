@@ -31,7 +31,7 @@ await cdp.send("Page.stopScreencast");
 await browser.close(); await mock.close();
 const lines = frames.map((t, i) => `file '${String(i).padStart(5, "0")}.jpg'\nduration ${((frames[i + 1] ?? t + 0.5) - t).toFixed(4)}`);
 fs.writeFileSync(`${dir}/list.txt`, lines.join("\n") + `\nfile '${String(frames.length - 1).padStart(5, "0")}.jpg'\n`);
-const vf = "fps=30,scale=780:-2:flags=lanczos,format=yuv420p";
+const vf = "fps=30,scale=780:-2:flags=lanczos:out_range=tv,format=yuv420p";
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libx264", "-crf", "20", "-preset", "slow", "-movflags", "+faststart", "-an", "media/mobile-tour.mp4"]);
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libvpx-vp9", "-crf", "34", "-b:v", "0", "-an", "media/mobile-tour.webm"]);
 console.log(frames.length, "frames -> media/mobile-tour.mp4/.webm");

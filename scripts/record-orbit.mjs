@@ -50,7 +50,7 @@ const lines = frames.map((t, i) => `file '${String(i).padStart(5, "0")}.jpg'\ndu
 fs.writeFileSync(`${dir}/list.txt`, lines.join("\n") + `\nfile '${String(frames.length - 1).padStart(5, "0")}.jpg'\n`);
 const base = `media/orbit-tour-${scheme}-trim`;
 // Drop the load, and play the agent typing the file in (12.5s-22.5s) at 2x so the tour stays tight.
-const vf = "trim=start=1.2,setpts=PTS-STARTPTS,fps=30,scale=1920:-2:flags=lanczos,format=yuv420p,setpts='if(lt(T,11.3),PTS,if(lt(T,21.3),11.3/TB+(T-11.3)*0.5/TB,PTS-5/TB))',fps=30";
+const vf = "trim=start=1.2,setpts=PTS-STARTPTS,fps=30,scale=1920:-2:flags=lanczos:out_range=tv,format=yuv420p,setpts='if(lt(T,11.3),PTS,if(lt(T,21.3),11.3/TB+(T-11.3)*0.5/TB,PTS-5/TB))',fps=30";
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libx264", "-crf", "20", "-preset", "slow", "-movflags", "+faststart", "-an", `${base}.mp4`]);
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`, "-vf", vf, "-c:v", "libvpx-vp9", "-crf", "34", "-b:v", "0", "-an", `${base}.webm`]);
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-ss", "3", "-i", `${base}.mp4`, "-frames:v", "1", "-q:v", "3", `media/orbit-tour-${scheme}-poster.jpg`]);

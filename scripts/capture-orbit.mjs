@@ -40,6 +40,8 @@ const clickTitle = async (title) => {
 const chord = async (a, b) => { await page.keyboard.press(a); await w(150); await page.keyboard.press(b); await w(300); };
 const home = async () => { await page.goto(URL); await w(1500); if (scheme === "light") await page.evaluate(() => document.documentElement.setAttribute("data-theme", "light")); };
 
+const voiceOnly = only.size > 0 && [...only].every(n => n.startsWith("voice-") || n.startsWith("settings-voice"));
+if (!voiceOnly) {
 await home();
 await shot("home");
 
@@ -158,12 +160,35 @@ for (const [title, name] of [["General", "general"], ["Agents", "agents"], ["Git
     await page.getByPlaceholder("Search commands or keybindings").fill("ctrl k"); await w(500);
     await page.getByPlaceholder("Search commands or keybindings").evaluate((e) => e.closest("section,div")?.scrollIntoView({ block: "start", behavior: "instant" })); await page.getByRole("heading", { name: "Keyboard shortcuts" }).first().evaluate((e) => e.scrollIntoView({ block: "start", behavior: "instant" })).catch(() => {}); await w(600);
     await shot("settings-keys");
+    await shot("settings-shortcuts");
     await page.getByText("Focus mode", { exact: true }).first().dblclick().catch(() => {}); await w(500);
     await page.keyboard.press("Control+k"); await w(250); await page.keyboard.press("y"); await w(500);
     await shot("settings-keys-recorder"); await page.keyboard.press("Escape"); await w(300);
     continue;
   }
   await shot(`settings-${name}`);
+}
+
+}
+
+// Voice controls and setup are captured directly from the mock UI, without downloading models.
+if (["voice-chat", "voice-setup", "settings-voice", "settings-voice-handsfree", "settings-voice-tidy"].some(want)) {
+  await home(); await clickText("Fix onboarding crash");
+  await page.getByRole("button", { name: "Dictate", exact: true }).waitFor();
+  await shot("voice-chat");
+  if (want("voice-setup")) {
+    await page.getByRole("button", { name: "Dictate", exact: true }).click();
+    await page.getByRole("dialog", { name: "Set up voice" }).waitFor();
+    await shot("voice-setup"); await esc();
+  }
+  await home(); await page.keyboard.press("Control+,"); await w(600);
+  const settingsNav = page.getByRole("navigation", { name: "Settings sections" });
+  await settingsNav.getByText("Voice", { exact: true }).click(); await shot("settings-voice");
+  await page.getByText("Hands-free", { exact: true }).last().evaluate(e => e.scrollIntoView({block: "start"}));
+  await shot("settings-voice-handsfree");
+  await settingsNav.getByText("Models", { exact: true }).click();
+  await page.getByRole("combobox", { name: "Voice tidy-up", exact: true }).scrollIntoViewIfNeeded();
+  await shot("settings-voice-tidy");
 }
 
 await browser.close();

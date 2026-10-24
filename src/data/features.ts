@@ -1,11 +1,11 @@
 // Every feature that exists in Orbit and Orbit Mobile today, grouped into chapters for the
 // "Everything in Orbit" section. Source of truth: agentic_ide/FEATURES.md and ide_mobile/FEATURES.md.
-// Only built features belong here (✅ works, 🟢 built, 🟡 partial). Planned items and ideas stay out.
+// Only built features belong here (✅ available, 🧪 preview). Planned items and ideas stay out.
 //
 // media.shot is a file in src/assets/raw/. crop is the region to show, as percentages of the
 // 2560×1600 (desktop) or 1170×2532 (phone) capture: [left, top, width, height].
 
-export type Tag = "Optional" | "Experimental";
+export type Tag = "Optional" | "Experimental" | "Preview";
 
 export interface Feature {
   title: string;
@@ -29,8 +29,11 @@ export const chapters: Chapter[] = [
     lead: "Every task gets its own worktree, branch, and agent.",
     media: { shot: "orbit-dark-new-workspace.png", crop: [25.5, 11.8, 48, 44], alt: "The New workspace dialog with a prompt, profile picker, repo, agent and model" },
     features: [
+      { title: "Open in your editor", body: "Open a workspace in VS Code, Cursor, Zed, Windsurf or JetBrains.", tag: "Preview" },
+      { title: "Worktree setup", body: "Set per-repo setup and run scripts. Ignored files such as .env are copied into new worktrees, and the first message waits for setup.", tag: "Preview" },
+      { title: "Best of N", body: "Run one prompt as two to four attempts. Compare checks, diff size, cost and time, then keep one and archive the rest.", tag: "Preview" },
       { title: "One worktree per task", body: "Each workspace is a real git worktree on its own branch. Agents never touch your main checkout." },
-      { title: "Start in one keystroke", body: "Write the task, pick repo, agent, model and profile. The agent starts the moment you hit Start.", keys: [["Ctrl", "N"]] },
+      { title: "Start in one keystroke", body: "Write the task, pick a repo, agent and model, and add a role if you want one. The agent starts the moment you hit Start.", keys: [["Ctrl", "N"]] },
       { title: "Run as many as you like", body: "Claude Code and Codex workspaces run side by side, in parallel, across repos." },
       { title: "A sidebar that tells you everything", body: "Repos, workspaces, live status, diff stats, and which agent is on each one." },
       { title: "Unread markers", body: "A workspace that finishes while you're elsewhere stays marked until you look." },
@@ -63,6 +66,15 @@ export const chapters: Chapter[] = [
     lead: "Claude Code and Codex, driven natively, in one transcript.",
     media: { shot: "orbit-dark-workspace-tools.png", crop: [23, 5, 60, 60], alt: "A workspace transcript with an expanded group of tool calls" },
     features: [
+      { title: "Dictation", body: "Use the mic button or hold Ctrl+Shift+Space. Local Whisper puts your words at the chat cursor.", keys: [["Ctrl", "Shift", "Space"]], tag: "Preview" },
+      { title: "Hands-free mode", body: "Talk, pause, and it sends. Replies are read aloud while the agent writes. Talk over it or say stop to interrupt; coughs and ums are ignored.", tag: "Preview" },
+      { title: "Natural read-aloud", body: "Kokoro runs on your computer with eight voices to choose from. Windows voices are the fallback.", tag: "Preview" },
+      { title: "Set up voice", body: "A one-time download dialog installs speech recognition and the natural voice together. Audio is never uploaded or saved.", tag: "Preview" },
+      { title: "Voice tidy-up", body: "Optionally turn dictation into a clean prompt in Settings > Models > Voice tidy-up. Only transcript text goes to the model you choose.", tag: "Preview" },
+      { title: "Images and files in chat", body: "Paste, drop or attach images and files. Images reach Claude and Codex natively; files arrive as paths. Browse thumbnails, file chips and a lightbox." },
+      { title: "Images from the agent", body: "See screenshots the agent reads, Codex image views and generated images, and markdown images in the chat.", tag: "Preview" },
+      { title: "Live agent plan", body: "The agent's own plan stays above the chat with live progress and a count in the sidebar.", tag: "Preview" },
+      { title: "Model lists from the CLIs", body: "Choose from the Codex catalog, Claude aliases or a custom model ID. Refresh in Settings > Agents or the palette." },
       { title: "Claude Code and Codex", body: "Claude through its streaming JSON interface, Codex through its app server. Real CLIs, your own accounts." },
       { title: "Live streaming", body: "Text streams in with a caret, with a thinking indicator while the agent works." },
       { title: "Tool calls, folded", body: "Runs of tool calls collapse into one line. Expand any of them to read the output." },
@@ -79,18 +91,20 @@ export const chapters: Chapter[] = [
     lead: "An editor that watches the agent work.",
     media: { shot: "orbit-dark-code-watch.png", crop: [17, 0, 83, 58], alt: "Code view in Watch mode, with the editor following the agent, changed lines flashed and the Activity timeline listing each turn's edits" },
     features: [
+      { title: "Diff comments", body: "Comment on lines or a range in the diff, then send all comments to the agent as one message.", tag: "Preview" },
+      { title: "Live typing", body: "See the agent's edits stream into the editor as they are written, before they reach disk.", tag: "Preview" },
       { title: "Open any folder", body: "A repo, any workspace's worktree, or a folder on disk.", keys: [["Alt", "2"]] },
       { title: "A real editor", body: "CodeMirror, themed for Void and Paper, with quick open, find and replace, and go to line.", keys: [["Ctrl", "P"]] },
-      { title: "Watch mode", body: "The editor follows the agent to the file it is changing and types new files in as the agent writes them, before they reach disk. Changed lines flash as each edit lands." },
-      { title: "Watch an agent", body: "Open a folder with no agent on it and pick any workspace to follow from the Watch an agent menu." },
+      { title: "Watch mode", body: "The editor follows the agent to the file it is changing and flashes changed lines as edits land. It stays read-only while the agent runs." },
+      { title: "Watch an agent", body: "Open a folder with no agent on it and pick any workspace to follow from the Watch an agent menu.", tag: "Preview" },
       { title: "Activity timeline", body: "Every turn's edits with + and − counts. Click one to diff it against the start of that turn." },
-      { title: "Manual mode", body: "No following. If a file you are editing changes on disk, choose Reload, Keep mine or Compare." },
+      { title: "Manual mode", body: "No following. If a file you are editing changes on disk, choose Reload, Keep mine or Compare.", tag: "Preview" },
       { title: "Ask about selection", body: "Send the selected lines and a question to the folder's workspace, or start a new one.", keys: [["Ctrl", "I"]] },
       { title: "Integrated terminal", body: "Several tabs, in your own shell.", keys: [["Ctrl", "`"]] },
       { title: "Project search", body: "Regex, case, whole word and globs, with results grouped by file.", keys: [["Ctrl", "Shift", "F"]] },
       { title: "Git gutter and diffs", body: "Changed lines are marked in the gutter, with a side-by-side diff against HEAD or the base branch." },
       { title: "Open in Code", body: "From the chat header, the Ship panel's changed files, or the palette." },
-      { title: "Editor settings", body: "Font size, tabs, word wrap, autosave and whether to follow the agent." },
+      { title: "Editor settings", body: "Font size, tabs, word wrap, autosave and whether to follow the agent.", tag: "Preview" },
     ],
   },
   {
@@ -99,6 +113,9 @@ export const chapters: Chapter[] = [
     lead: "Give each agent a job, and the tools for it.",
     media: { shot: "orbit-dark-packs.png", crop: [42.5, 5.5, 46, 63], alt: "The Skill packs dialog with the bundled shipkit pack and an installed pack" },
     features: [
+      { title: "Optional roles", body: "New workspaces start with no role. Use + Add role, set a default in Settings > General, or choose No role in the chat footer.", tag: "Preview" },
+      { title: "Skills per workspace", body: "Turn enabled skill packs off for individual workspaces; skills and profiles follow that selection.", tag: "Preview" },
+      { title: "Shared MCP servers", body: "Add stdio or HTTP servers once for Claude and Codex in Settings > MCP servers. Test or import them, with workspace toggles for new sessions.", tag: "Preview" },
       { title: "Six profiles", body: "Builder, Debugger, Planner, Reviewer, Shipper and Ticket writer. Packs can add more." },
       { title: "Read-only means read-only", body: "Planner and Reviewer are blocked from writing at the tool layer. Claude gets a strict allowlist, Codex a read-only sandbox." },
       { title: "Switch roles mid-session", body: "Change profile from the composer or palette. The agent is told its role changed." },
@@ -133,6 +150,7 @@ export const chapters: Chapter[] = [
     lead: "See what each session costs, before it costs too much.",
     media: { shot: "orbit-dark-context.png", crop: [56, 61.5, 37, 36.5], alt: "The context meter popover showing this session's tokens and cost" },
     features: [
+      { title: "Plan limits", body: "See Claude and Codex five-hour and weekly limits in Settings > Usage, with a warning in the composer near the limit.", tag: "Preview" },
       { title: "Context meter", body: "A bar and a percentage in the composer. It turns amber at 70% and red at 90%." },
       { title: "Compact or start fresh", body: "Compact the conversation, or begin a new session in the same workspace." },
       { title: "Per-turn cost", body: "Every turn ends with its duration, tokens and cost." },
@@ -157,6 +175,7 @@ export const chapters: Chapter[] = [
     lead: "From fixed to merged without leaving Orbit.",
     media: { shot: "orbit-dark-ship.png", crop: [58.5, 0, 41.5, 62], alt: "The Ship panel showing a pull request's checks, review state and changed files" },
     features: [
+      { title: "AI review after Ship", body: "Enable a read-only Claude review in Settings > Git > Review. Read findings in Orbit, send them to the agent or post them to the PR.", tag: "Preview" },
       { title: "Ship", body: "One click commits, pushes and opens a draft pull request with a written summary.", keys: [["Ctrl", "Shift", "G"]] },
       { title: "A live PR card", body: "Checks with the failing names, review decision and changed files. It refreshes while checks run." },
       { title: "Fix CI", body: "Syncs the branch, reads the failing logs, fixes and pushes. From the Ship panel or the inbox." },
@@ -175,6 +194,7 @@ export const chapters: Chapter[] = [
     lead: "Short branches, small commits, and nothing broken on main.",
     media: { shot: "orbit-dark-settings-git.png", crop: [39.5, 5, 53.5, 70], alt: "Git settings for save points, commit messages, squashing and checks before Ship" },
     features: [
+      { title: "Rewind or branch", body: "Return a workspace to an earlier turn, or branch a new workspace from it by hovering over one of your messages.", tag: "Preview" },
       { title: "Save points", body: "After every turn that changes files, Orbit commits a save point. Undo last turn rolls one back." },
       { title: "Squashed before Ship", body: "Unpushed save points fold into one clean commit before the PR opens." },
       { title: "Checks before Ship", body: "Orbit runs your checks first. Off, warn, or block, with Fix and Ship anyway in the inbox." },
@@ -252,7 +272,7 @@ export const chapters: Chapter[] = [
     features: [
       { title: "Void and Paper", body: "A dark theme and a light one. The title bar follows.", keys: [["Ctrl", "K"], ["Ctrl", "T"]] },
       { title: "Colour means something", body: "The interface is greyscale. Colour only shows status: running, done, failed, merged." },
-      { title: "VS Code keybindings", body: "The default VS Code map, Ctrl+K chords included. Rebind any command in Settings, with search and a warning when two keys collide.", keys: [["Ctrl", "K"], ["Ctrl", "S"]] },
+      { title: "VS Code keybindings", body: "The default VS Code map, Ctrl+K chords included. Rebind any command in Settings, with search and a warning when two keys collide.", keys: [["Ctrl", "K"], ["Ctrl", "S"]], tag: "Preview" },
       { title: "Command palette", body: "Jump to any workspace, run any skill or action.", keys: [["Ctrl", "Shift", "P"]] },
       { title: "Focus mode", body: "Hide the sidebar and the Ship panel. Just you and the agent.", keys: [["Ctrl", "K"], ["Z"]] },
       { title: "Ship panel on request", body: "It never opens on its own. The header shows the PR and its checks at a glance.", keys: [["Ctrl", "Shift", "G"]] },

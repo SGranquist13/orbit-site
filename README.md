@@ -1,6 +1,6 @@
 # Orbit marketing site
 
-Public product preview for Orbit desktop and Orbit Mobile. The app repositories remain private during development.
+Public product preview for Orbit desktop and Orbit Mobile. Orbit desktop [v0.3.0](https://github.com/SGranquist13/orbit/releases/tag/v0.3.0) is public, released 2026-10-22. The mobile app remains in development.
 
 ## Develop
 
@@ -28,7 +28,7 @@ npm run preview
 
 For a custom domain, configure it in Settings → Pages and set the Actions variables `SITE_URL` to the HTTPS origin and `BASE_PATH` to `/`.
 
-Launch links live in `src/config.ts`. Until the apps are public, use this repository to follow development and share feedback. Watching the repository for discussions gives GitHub notifications; this is not an email waitlist.
+Launch links live in `src/config.ts`. Desktop release and installer links point to v0.3.0. Use this repository for site feedback. Watching the repository for discussions gives GitHub notifications; this is not an email waitlist.
 
 ## Media
 

@@ -119,6 +119,18 @@ const faq = [
   { q: "When can I use it?", a: "Now. Orbit is open source under the MIT license. Download the Windows installer from the latest release, or build it from source." },
 ];
 
+
+const reviewFacts = [
+  { label: "YOUR AGENTS' WORK", line: "Review a workspace before it becomes a pull request. Comment on any line, even a deleted one, and the agent gets every note as one message." },
+  { label: "GITHUB PULL REQUESTS", line: "Comment on either side, suggest changes, reply, resolve and approve. Your pending review is saved on GitHub as you write it." },
+  { label: "CAREFUL DIFFS", line: "Unified or split, whitespace hidden, only what changed since your last review, and images side by side." },
+];
+const reviewCaptures = [
+  { name: "review-local", title: "A workspace, before it ships", alt: "Orbit's Review view on a local workspace: a pending comment on a removed line, ready to send to the agent." },
+  { name: "review-submit", title: "Finish the review", alt: "The Finish your review popover with a summary, two pending comments, and Approve selected." },
+  { name: "review-image", title: "Images, side by side", alt: "An image diff in the Review view: the old and new logo side by side, scaled up with their sizes." },
+];
+
 const ideShot = shot("orbit-dark-code-terminal.png");
 const ideFacts = [
   { label: "WATCH MODE", line: "The editor follows the agent from file to file and flashes every edit as it lands." },
@@ -261,6 +273,45 @@ const keyLabel = (k: string[]) => k.join(" ");
             </WindowFrame>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- REVIEW: featured, ahead of its release -->
+    <section id="review" class="section review">
+      <div class="container mobile-head">
+        <Eyebrow>REVIEW · PREVIEW · COMING IN THE NEXT RELEASE</Eyebrow>
+        <h2 class="h2">Review every change. <span class="mute">Before it ships.</span></h2>
+        <p class="lead">
+          One queue for what your agents changed and the pull requests waiting on you. Read each change file by file, comment on any line, then send it back to the agent or submit it to GitHub, without opening a browser.
+        </p>
+      </div>
+      <div class="container-wide ide-window">
+        <DitherReveal cell={4}>
+          <WindowFrame video="review-trim" posterSrc="media/review-poster.jpg" alt="Orbit's Review view: a pull request with review threads, a suggested change added on lines 16 to 19, and the review submitted as Approve." />
+        </DitherReveal>
+        <ul class="facts">
+          {
+            reviewFacts.map((f) => (
+              <li class="fact">
+                <div class="dither-rule"></div>
+                <Eyebrow class="fact-label">{f.label}</Eyebrow>
+                <p>{f.line}</p>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="review-captures">
+          {reviewCaptures.map((c) => (
+            <figure class="review-capture">
+              <WindowFrame image={shot(`orbit-dark-${c.name}.png`)} alt={c.alt} />
+              <figcaption><Eyebrow>{c.title}</Eyebrow></figcaption>
+            </figure>
+          ))}
+        </div>
+        <p class="lead review-keys">
+          <kbd class="kbd">Alt 6</kbd> opens it. <kbd class="kbd">[</kbd> <kbd class="kbd">]</kbd> move between files, <kbd class="kbd">V</kbd> marks one viewed, <kbd class="kbd">O</kbd> opens it in the Code view at the line you're reading.
+        </p>
+        <div class="ctas"><Button href={GITHUB_URL} variant="secondary">Watch the repo for the release</Button></div>
       </div>
     </section>
 
@@ -583,6 +634,12 @@ const keyLabel = (k: string[]) => k.join(" ");
     .why-after { font-size: 18px; }
   }
 
+  .review-captures { margin-top: 96px; display: grid; gap: 40px; }
+  @media (min-width: 768px) { .review-captures { grid-template-columns: repeat(3, 1fr); gap: 32px; } }
+  @media (max-width: 639px) { .review-captures { margin-top: 64px; } }
+  .review-capture { margin: 0; }
+  .review-capture figcaption { margin-top: 16px; }
+  .review-keys { margin: 56px auto 0; max-width: 60ch; text-align: center; }
   .voice-note, .voice-captures { margin-top: 40px; }
   .voice-captures { display: grid; gap: 40px; }
   @media (min-width: 768px) { .voice-captures { grid-template-columns: repeat(2, 1fr); gap: 48px 32px; } }

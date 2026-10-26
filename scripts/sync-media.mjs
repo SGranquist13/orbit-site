@@ -13,6 +13,8 @@ const clipsOnly = process.argv.includes("--clips-only");
 const desktopOnly = process.argv.includes("--desktop-only");
 const voice = ["voice-setup", "settings-voice", "settings-voice-handsfree", "settings-voice-tidy"].map(n => `orbit-dark-${n}.png`);
 pinned.push(...voice);
+const review = ["review-local", "review-submit", "review-image"].map(n => `orbit-dark-${n}.png`);
+pinned.push(...review);
 const wanted = new Set([...fromManifest, ...pinned]);
 
 mkdirSync("src/assets/raw", { recursive: true });
@@ -30,7 +32,7 @@ for (const [from, to] of (desktopOnly || clipsOnly ? [] : videos)) copyFileSync(
 console.log(`${clipsOnly ? 0 : [...wanted].filter(f => !desktopOnly || f.startsWith("orbit-")).length} images, ${desktopOnly || clipsOnly ? 0 : videos.length} tour files synced`);
 
 // Optional clips are published only as complete sets. --clips-only preserves all stills and tours.
-for (const name of ["voice", "ide"]) {
+for (const name of ["voice", "ide", "review"]) {
   const files = [`${name}-trim.mp4`, `${name}-trim.webm`, `${name}-poster.jpg`];
   if (files.every(f => existsSync(`media/${f}`))) {
     for (const f of files) copyFileSync(`media/${f}`, `public/media/${f}`);

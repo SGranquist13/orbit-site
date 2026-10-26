@@ -1,5 +1,5 @@
 // Real browser-UI clips. Start the Orbit mock on :1420 first.
-// node scripts/record-clips.mjs ide|voice
+// node scripts/record-clips.mjs ide|voice|review
 // FFMPEG may name a full ffmpeg binary. Without one, Playwright's VP9 encoder
 // creates WebM and Chromium transcodes those same frames to H.264 MP4.
 // Voice requires usable Windows System.Speech voices; failure never creates a fake clip.
@@ -11,8 +11,8 @@ import { once } from 'node:events';
 import sharp from 'sharp';
 
 const clip = process.argv[2];
-if (!['voice', 'ide'].includes(clip)) throw new Error('Usage: node scripts/record-clips.mjs voice|ide');
-const duration = clip === 'voice' ? 16 : 14;
+if (!['voice', 'ide', 'review'].includes(clip)) throw new Error('Usage: node scripts/record-clips.mjs voice|ide|review');
+const duration = clip === 'voice' ? 16 : clip === 'review' ? 18 : 14;
 const work = path.resolve('media/clips-work', `${clip}-${Date.now()}`);
 fs.mkdirSync(work, {recursive:true});
 const base = path.resolve('media', `${clip}-trim`);
@@ -58,7 +58,13 @@ try {
   const wait=ms=>page.waitForTimeout(ms);
   await page.goto(`http://localhost:1420/${clip==='voice'?'?seed=launch&ws=w1':''}`);
   await wait(2000);
-  if (clip==='ide') {
+  if (clip==='review') {
+    // Review view with the Orbit sidebar collapsed, so the diff gets the width.
+    await page.keyboard.press('Control+b'); await wait(300);
+    await page.keyboard.press('Alt+6'); await wait(800);
+    await page.locator('[data-testid="review-pr-842"]').waitFor();
+    await page.evaluate(async()=>{const {api}=await import('/src/lib/ipc.ts');await api.updateSettings({reviewDiffLayout:'unified'});});
+  } else if (clip==='ide') {
     await page.keyboard.press('Alt+2'); await wait(500);
     if(await page.getByText('Open a folder or a workspace').count()) await page.getByText('Fix onboarding crash',{exact:true}).last().click();
     await page.locator('.cm-editor').first().waitFor({state:'attached'}); await wait(1000);
@@ -83,7 +89,30 @@ try {
   origin=Date.now();
   const mark=action=>{const event={at:+((Date.now()-origin)/1000).toFixed(2),action};evidence.push(event);console.log(event);};
   await cdp.send('Page.startScreencast',{format:'jpeg',quality:90,maxWidth:2560,maxHeight:1600,everyNthFrame:1});
-  if(clip==='ide') {
+  if(clip==='review') {
+    const num=(kind,n)=>page.locator(`[data-review-diff] .rv-row.rv-${kind}`).filter({has:page.locator('.rv-num',{hasText:new RegExp(`^${n}$`)})}).first().locator('.rv-num').nth(kind==='del'?0:1);
+    await wait(500);mark('Open a pull request from the queue');
+    await page.locator('[data-testid="review-pr-842"]').click();
+    await page.locator('[data-review-diff="src/auth/session.ts"]').waitFor();await wait(1300);
+    await page.locator('[data-review-diff]').locator('xpath=..').evaluate(el=>el.scrollTo({top:240,behavior:'smooth'}));await wait(900);
+    mark('Select lines 16-19');
+    await num('add',16).dispatchEvent('mousedown');await wait(350);
+    await num('add',19).dispatchEvent('mousedown',{shiftKey:true});await wait(600);
+    mark('Suggest a change');
+    await page.getByRole('button',{name:'± Suggest change'}).click();await wait(400);
+    const box=page.locator('[data-composer] textarea');
+    await box.press('Control+Home');
+    await page.keyboard.type('Refresh here too, so a session that expires mid-request is renewed.\n',{delay:22});
+    await wait(400);mark('Add it to the review');
+    await page.getByRole('button',{name:'Add review comment'}).click();await wait(1400);
+    mark('Finish the review');
+    await page.locator('[data-testid="review-submit-open"]').click();await wait(500);
+    await page.keyboard.type('Nice work. One suggestion inline.',{delay:24});await wait(300);
+    await page.getByText('Approve',{exact:true}).click();await wait(600);
+    await page.locator('[data-testid="review-submit"]').click();
+    mark('Submitted');await wait(1600);
+    await page.locator('button[title="Split"]').click();mark('Split view');
+  } else if(clip==='ide') {
     await wait(650);mark('Agent starts editing in Watch mode');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('orbit-simulate-agent-edit')));
     await page.getByText(/^Updated session handling/).first().waitFor({timeout:20000});

@@ -31,7 +31,7 @@ Patterns we take:
 - **1-bit Bayer dither** is the signature: the black-hole art, the dithered horizon, the dotted dividers (`······`) under headers, and the dither "glow" behind the active sidebar row. **The site's graphic language is this dither, not gradients.**
 - Lowercase **"orbit"** wordmark set in Inter semibold beside the black-hole mark.
 - **Hard offset shadows**: `4px 4px 0 0 #000, 4px 4px 0 1px #34343b` (dark). On light (Paper): `4px 4px 0 0 #111113`. Used on composers, cards and popovers.
-- **JetBrains Mono uppercase micro-labels with wide tracking**: `SUPERSET`, `3 TOOL CALLS`, `SHIP`, `CHANGES`. Keyboard hints drawn as small outlined `kbd` boxes (`Ctrl I`).
+- **JetBrains Mono uppercase micro-labels with wide tracking**: `RELAY`, `3 TOOL CALLS`, `SHIP`, `CHANGES`. Keyboard hints drawn as small outlined `kbd` boxes (`Ctrl I`).
 - Small **square status pixels** (6–8px squares, not circles) before workspace names.
 - Radii: 14px cards, 10px controls, pills only for chips and toggles.
 

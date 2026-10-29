@@ -12,7 +12,7 @@ import sharp from 'sharp';
 
 const clip = process.argv[2];
 if (!['voice', 'ide', 'review'].includes(clip)) throw new Error('Usage: node scripts/record-clips.mjs voice|ide|review');
-const duration = clip === 'voice' ? 16 : clip === 'review' ? 18 : 14;
+const duration = clip === 'voice' ? 16 : clip === 'review' ? 18 : 22;
 const work = path.resolve('media/clips-work', `${clip}-${Date.now()}`);
 fs.mkdirSync(work, {recursive:true});
 const base = path.resolve('media', `${clip}-trim`);
@@ -50,7 +50,7 @@ const browser = await chromium.launch({headless: clip !== 'voice', args: clip ==
 const frames = [], evidence = [];
 let origin = 0;
 try {
-  const context = await browser.newContext({viewport:{width:1280,height:800},deviceScaleFactor:1.5,colorScheme:'dark'});
+  const context = await browser.newContext({viewport:{width:1200,height:750},deviceScaleFactor:clip==='voice'?1:2,colorScheme:'dark'});
   const page = await context.newPage();
   await page.addInitScript(()=>{const original=window.setInterval.bind(window);window.setInterval=(f,t,...a)=>t===12000?0:original(f,t,...a);});
   page.on('pageerror',e=>evidence.push({at:(Date.now()-origin)/1000,error:e.message}));
@@ -65,7 +65,7 @@ try {
     await page.locator('[data-testid="review-pr-842"]').waitFor();
     await page.evaluate(async()=>{const {api}=await import('/src/lib/ipc.ts');await api.updateSettings({reviewDiffLayout:'unified'});});
   } else if (clip==='ide') {
-    await page.keyboard.press('Alt+2'); await wait(500);
+    await page.keyboard.press('Control+b'); await wait(300); await page.keyboard.press('Alt+2'); await wait(500);
     if(await page.getByText('Open a folder or a workspace').count()) await page.getByText('Fix onboarding crash',{exact:true}).last().click();
     await page.locator('.cm-editor').first().waitFor({state:'attached'}); await wait(1000);
   } else {
@@ -77,6 +77,8 @@ try {
       localStorage.setItem('orbit.voice.setupDismissed','1');
     });
     await page.getByRole('button',{name:'Hands-free',exact:true}).waitFor();
+    await page.locator('button:text-is("Goal") + button:text-is("Collapse")').first().click().catch(()=>{});await wait(300);
+    await page.keyboard.press('Control+b');await wait(400);
     evidence.push({voices:await page.evaluate(()=>speechSynthesis.getVoices().map(v=>v.name))});
   }
   const cdp=await context.newCDPSession(page);
@@ -115,7 +117,7 @@ try {
   } else if(clip==='ide') {
     await wait(650);mark('Agent starts editing in Watch mode');
     await page.evaluate(()=>window.dispatchEvent(new CustomEvent('orbit-simulate-agent-edit')));
-    await page.getByText(/^Updated session handling/).first().waitFor({timeout:20000});
+    await wait(14000);
     mark('Edit complete; gutter and timeline remain visible');
     await wait(350);await page.keyboard.press('Control+`');await wait(500);
     mark('Terminal opens');
@@ -137,7 +139,7 @@ try {
 
   // CDP only emits changed frames. Repeat frames at 30 fps using their real timestamps.
   // Voice frames are 2560x1600 (headed at 2x); crop to the chat column, hands-free bar and composer.
-  const crop=clip==='voice'?'crop=2000:1250:410:330,scale=1920:1200':'scale=1920:1200';
+  const crop='scale=1920:1200';
   // Screencast frames are full-range JPEG; browsers need TV-range yuv420p or they fail to decode.
   const vf=`${crop}:out_range=tv,format=yuv420p`;
   async function encode(out,args){
@@ -171,7 +173,6 @@ try {
     fs.writeFileSync(`${base}.mp4`,Buffer.from(bytes));await transcode.close();
   }
   let poster=sharp(frames[Math.min(frames.length-1,Math.floor(frames.length*0.4))].file);
-  if(clip==='voice') poster=poster.extract({left:410,top:330,width:2000,height:1250});
   await poster.resize(1920,1200).jpeg({quality:85}).toFile(`media/${clip}-poster.jpg`);
   console.log('Evidence:',path.join(work,'evidence.json'));
   for(const file of [`${base}.mp4`,`${base}.webm`,path.resolve(`media/${clip}-poster.jpg`)]) console.log(file,fs.statSync(file).size,'bytes');

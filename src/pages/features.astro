@@ -14,17 +14,12 @@ import PhoneFrame from "../components/PhoneFrame.astro";
 import Kbd from "../components/Kbd.astro";
 import Footer from "../components/Footer.astro";
 import Marquee from "../components/Marquee.astro";
-import { GITHUB_URL } from "../config";
+import { GITHUB_URL, VERSION } from "../config";
 import { asset } from "../lib/url";
-import { chapters, featureCount } from "../data/features";
+import { chapters, featureCount, areaCount, releasedIn, soonCount, previewCount } from "../data/features";
+import { story } from "../data/story";
+import { shot } from "../lib/shots";
 
-// Every capture in src/assets/raw (kept in sync with the manifest by scripts/sync-media.mjs).
-const raw = import.meta.glob<{ default: ImageMetadata }>("../assets/raw/*.png", { eager: true });
-const shot = (name: string): ImageMetadata => {
-  const m = raw[`../assets/raw/${name}`];
-  if (!m) throw new Error(`Missing capture: ${name}. Run node scripts/sync-media.mjs`);
-  return m.default;
-};
 const workspace = shot("orbit-dark-workspace.png");
 const mobileWorkspace = shot("mobile-workspace.png");
 const mobileWorkspaces = shot("mobile-workspaces.png");
@@ -36,57 +31,7 @@ const statement =
   "Agents are fast. Waiting on them isn't. Orbit runs every task in its own worktree and tells you the moment one needs you: a question, a failed check, a finished pull request.";
 const words = statement.split(" ");
 
-const features = [
-  {
-    title: "One task, one worktree.",
-    body: "Start a workspace and Orbit cuts a fresh branch and worktree for it. Claude Code and Codex run side by side in their own checkouts, with live diff stats in the sidebar.",
-    kbd: ["Ctrl N"],
-    img: workspace,
-    alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats.",
-  },
-  {
-    title: "Only what needs you.",
-    body: "The inbox collects every agent that asked a question, failed, or finished, plus any pull request with red checks. Suggested replies are one keystroke away.",
-    kbd: ["Alt 1", "J", "K", "E", "S"],
-    img: shot("orbit-dark-inbox.png"),
-    alt: "Orbit inbox listing agents that asked, failed, or finished.",
-  },
-  {
-    title: "From fix to merge in one panel.",
-    body: "Ship shows the draft PR, check status, review state, and every changed file. Fix CI and Address comments hand the failure straight back to the agent.",
-    kbd: ["Ctrl Shift G"],
-    img: shot("orbit-dark-ship.png"),
-    alt: "Orbit Ship panel with the draft pull request, checks and changed files.",
-  },
-  {
-    title: "Agents with a job description.",
-    body: "Builder, Debugger, Planner, Reviewer, Shipper. Read-only profiles are blocked from writing at the tool layer, not asked nicely in a prompt. Add skill packs from any git URL.",
-    kbd: ["Alt 4"],
-    img: shot("orbit-dark-teammates-chief.png"),
-    alt: "Orbit command palette listing agent profiles.",
-  },
-  {
-    title: "Work starts from the backlog.",
-    body: "Pull in GitHub issues and press Enter to start one in a fresh workspace, or P to have a Planner write the plan first.",
-    kbd: ["Alt 5"],
-    img: shot("orbit-dark-teammates-chief.png"),
-    alt: "Orbit issues view.",
-  },
-  {
-    title: "Work that runs while you sleep.",
-    body: "Routines send a message on a schedule: triage at nine, checks at two, a sweep of stale branches on Fridays. Runs with nothing to do archive themselves.",
-    kbd: ["Alt 3"],
-    img: shot("orbit-dark-routine-editor.png"),
-    alt: "Orbit routine editor with a prompt, schedule and templates.",
-  },
-  {
-    title: "Simpler code, same behaviour.",
-    body: "Simplify reads what changed, lists what could be simpler, and applies one candidate at a time. Each one is checked and committed as a refactor, or put back.",
-    kbd: [] as string[],
-    img: shot("orbit-dark-simplify-applying.png"),
-    alt: "Orbit Simplify panel applying refactor candidates one at a time.",
-  },
-];
+const features = story.map((f) => ({ ...f, img: shot(f.shot) }));
 const total = String(features.length).padStart(2, "0");
 
 const steps = [
@@ -128,7 +73,7 @@ const chapterMedia = chapters.map((c) => {
     cropW: w,
   };
 });
-const areas = chapters.length;
+const areas = areaCount;
 const apps = 2;
 void PHONE;
 const stats = [
@@ -139,7 +84,7 @@ const stats = [
 const keyLabel = (k: string[]) => k.join(" ");
 ---
 
-<Layout title="Every feature — Orbit" description="Every feature in Orbit 0.3.0 and Orbit Mobile: the built-in IDE, agents, shipping, routines and local voice in Preview.">
+<Layout title="Every feature — Orbit" description={`Every feature in Orbit ${VERSION} and Orbit Mobile: the built-in IDE, agents, review, shipping and routines, with Preview and Coming soon features marked.`}>
   <Nav />
   <main id="top">
     <!-- EVERYTHING IN ORBIT -->
@@ -181,9 +126,8 @@ const keyLabel = (k: string[]) => k.join(" ");
                   chapterMedia.map((c, i) => (
                     <li>
                       <a class="index-row" href={`#ch-${c.id}`} data-index={c.id} data-active={i === 0 ? "" : undefined}>
-                        <span class="index-idx">{String(i + 1).padStart(2, "0")}</span>
                         <span class="index-title">{c.title}</span>
-                        <span class="index-count">{c.features.length}</span>
+                        {releasedIn(c) === 0 && <span class="index-count">Soon</span>}
                       </a>
                     </li>
                   ))
@@ -198,7 +142,6 @@ const keyLabel = (k: string[]) => k.join(" ");
                 <article class="chapter" id={`ch-${c.id}`} data-chapter={c.id}>
                   <header class="ch-head">
                     <div class="ch-title-row">
-                      <span class="ch-idx">{String(i + 1).padStart(2, "0")}</span>
                       <h3 class="ch-title">{c.title}</h3>
                     </div>
                     <p class="ch-lead">{c.lead}</p>
@@ -232,7 +175,7 @@ const keyLabel = (k: string[]) => k.join(" ");
                         <div class="dither-rule"></div>
                         <div class="feat-title">
                           <h4>{f.title}</h4>
-                          {f.tag && <span class="tag">{f.tag}</span>}
+                          {f.tag && <span class="tag" data-soon={f.tag === "Coming soon" ? "" : undefined}>{f.tag}</span>}
                         </div>
                         <p>{f.body}</p>
                         {f.keys && (
@@ -498,6 +441,7 @@ const keyLabel = (k: string[]) => k.join(" ");
   .feat .dither-rule { margin-bottom: 24px; }
   .feat-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
   .feat h4 { margin: 0; font-size: 16px; font-weight: 540; letter-spacing: -0.01em; line-height: 1.35; color: var(--fg); }
+  .tag[data-soon] { border-style: dashed; }
   .tag { font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); border: 1px solid var(--line-strong); border-radius: 9999px; padding: 4px 8px; }
   .feat p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--dim); text-wrap: pretty; }
   .feat-keys { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }

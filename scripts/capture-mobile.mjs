@@ -17,7 +17,7 @@ await shot("inbox");
 await page.goto("http://localhost:8099/workspaces"); await page.waitForTimeout(2500); await shot("workspaces");
 await page.goBack().catch(() => {}); await page.waitForTimeout(800);
 await page.goto("http://localhost:8099/"); await page.waitForTimeout(3000);
-const first = page.getByText("Fix onboarding crash").first();
+const first = page.getByText("Onboarding crash").first();
 if (await first.count()) { await first.click(); await shot("workspace"); }
 for (const tab of ["Activity", "Files"]) { const t = page.getByText(tab, { exact: true }); if (await t.count()) { await t.first().click(); await shot(tab.toLowerCase()); } }
 const f = page.getByText("submit.ts", { exact: true }); if (await f.count()) { await f.first().click(); await shot("diff"); }

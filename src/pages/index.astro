@@ -16,15 +16,10 @@ import Footer from "../components/Footer.astro";
 import Marquee from "../components/Marquee.astro";
 import { GITHUB_URL, RELEASES_URL, DOWNLOAD_URL, VERSION } from "../config";
 import { asset } from "../lib/url";
-import { chapters, featureCount } from "../data/features";
+import { chapters, featureCount, areaCount, releasedIn } from "../data/features";
+import { story } from "../data/story";
+import { shot } from "../lib/shots";
 
-// Every capture in src/assets/raw (kept in sync with the manifest by scripts/sync-media.mjs).
-const raw = import.meta.glob<{ default: ImageMetadata }>("../assets/raw/*.png", { eager: true });
-const shot = (name: string): ImageMetadata => {
-  const m = raw[`../assets/raw/${name}`];
-  if (!m) throw new Error(`Missing capture: ${name}. Run node scripts/sync-media.mjs`);
-  return m.default;
-};
 const workspace = shot("orbit-dark-workspace.png");
 const mobileWorkspace = shot("mobile-workspace.png");
 const mobileWorkspaces = shot("mobile-workspaces.png");
@@ -36,57 +31,7 @@ const statement =
   "Agents are fast. Waiting on them isn't. Orbit runs every task in its own worktree and tells you the moment one needs you: a question, a failed check, a finished pull request.";
 const words = statement.split(" ");
 
-const features = [
-  {
-    title: "One task, one worktree.",
-    body: "Start a workspace and Orbit cuts a fresh branch and worktree for it. Claude Code and Codex run side by side in their own checkouts, with live diff stats in the sidebar.",
-    kbd: ["Ctrl N"],
-    img: workspace,
-    alt: "Orbit workspace with the fleet listed in the sidebar and live diff stats.",
-  },
-  {
-    title: "Watch it write.",
-    body: "Open Code view on any workspace and the editor follows the agent. New files type in as they are written and each edit flashes. An Activity timeline diffs every turn.",
-    kbd: ["Alt 2"],
-    img: shot("orbit-dark-code-watch.png"),
-    alt: "Orbit Code view following an agent, with flashed edits and the Activity timeline.",
-  },
-  {
-    title: "Only what needs you.",
-    body: "The inbox collects every agent that asked a question, failed, or finished, plus any pull request with red checks. Suggested replies are one keystroke away.",
-    kbd: ["Alt 1", "J", "K", "E", "S"],
-    img: shot("orbit-dark-inbox.png"),
-    alt: "Orbit inbox listing agents that asked, failed, or finished.",
-  },
-  {
-    title: "A team, not a prompt.",
-    body: "Hand a task to a teammate and get a report back. Chief splits a vague request into parts for Builder, Debugger and Reviewer, and nothing starts until you press Start all. Read-only roles like Planner and Reviewer are blocked from writing at the tool layer.",
-    kbd: ["Alt 4"],
-    img: shot("orbit-dark-teammates-chief.png"),
-    alt: "Orbit Teammates view with Chief's plan card splitting a request into parts.",
-  },
-  {
-    title: "From fix to merge in one panel.",
-    body: "Ship shows the draft PR, check status, review state, and every changed file. Fix CI and Address comments hand the failure straight back to the agent.",
-    kbd: ["Ctrl Shift G"],
-    img: shot("orbit-dark-ship.png"),
-    alt: "Orbit Ship panel with the draft pull request, checks and changed files.",
-  },
-  {
-    title: "Work that runs while you sleep.",
-    body: "Routines send a message on a schedule: triage at nine, checks at two, a sweep of stale branches on Fridays. Runs with nothing to do archive themselves.",
-    kbd: ["Alt 3"],
-    img: shot("orbit-dark-routine-editor.png"),
-    alt: "Orbit routine editor with a prompt, schedule and templates.",
-  },
-  {
-    title: "Simpler code, same behaviour.",
-    body: "Simplify reads what changed, lists what could be simpler, and applies one candidate at a time. Each one is checked and committed as a refactor, or put back.",
-    kbd: [] as string[],
-    img: shot("orbit-dark-simplify-applying.png"),
-    alt: "Orbit Simplify panel applying refactor candidates one at a time.",
-  },
-];
+const features = story.map((f) => ({ ...f, img: shot(f.shot) }));
 const total = String(features.length).padStart(2, "0");
 
 const steps = [
@@ -103,7 +48,7 @@ const why = [
   { label: "STAYING CLEAN", before: "Branches drift, collide and pile up.", orbit: "Save points, auto-sync onto main, overlap warnings, and cleanup after merge." },
   { label: "READING THE CODE", before: "The diff lands in a chat bubble, and you open another editor to read it.", orbit: "Watch the diff land in a real editor as the agent writes, with a timeline of every turn." },
   { label: "GUARDRAILS", before: "“Please don't edit anything,” written in the prompt.", orbit: "Read-only roles, blocked at the tool layer." },
-  { label: "AWAY FROM THE DESK", before: "Work stalls the moment you walk away.", orbit: "Answer, steer or stop any agent from your phone, end-to-end encrypted." },
+  { label: "AWAY FROM THE DESK", before: "Work stalls the moment you walk away.", orbit: "Answer, steer or stop any agent from your phone, end-to-end encrypted. The iPhone app is in development." },
   { label: "YOUR STACK", before: "Another app, with its own account, its own model and its own bill.", orbit: "Your own Claude Code and Codex, on your machine and your accounts." },
 ];
 
@@ -114,8 +59,8 @@ const faq = [
   { q: "Do I still need VS Code?", a: "Orbit has an editor, terminal, project search and diffs built in, with VS Code keybindings, so you can read and change what the agent wrote without leaving. There is also Open in Code. Keep your own editor for anything else." },
   { q: "What are teammates?", a: "Named agents with a role, a memory and a thread. You hand them tasks, they open workspaces and draft pull requests, and they report back. For a bigger request, Chief splits it into parts for the others." },
   { q: "Which agents does it support?", a: "Claude Code and Codex, side by side. Background tasks like inbox suggestions can also run on a local model through Ollama or any OpenAI-compatible server." },
-  { q: "How does the phone connect?", a: "Scan a QR code in Orbit's settings. After the pairing handshake every message is end-to-end encrypted, over your local network or Tailscale." },
-  { q: "What platforms does it run on?", a: "Orbit 0.3.0 is built and tested on Windows, with an installer on GitHub. Orbit Mobile for iPhone is still in development and not released yet." },
+  { q: "How does the phone connect?", a: "Scan a QR code in Orbit's settings. After the pairing handshake every message is end-to-end encrypted, over your local network." },
+  { q: "What platforms does it run on?", a: `Orbit ${VERSION} is built and tested on Windows, with an installer on GitHub. Orbit Mobile for iPhone is still in development and not released yet.` },
   { q: "When can I use it?", a: "Now. Orbit is open source under the MIT license. Download the Windows installer from the latest release, or build it from source." },
 ];
 
@@ -127,7 +72,7 @@ const reviewFacts = [
 ];
 const reviewCaptures = [
   { name: "review-local", title: "A workspace, before it ships", alt: "Orbit's Review view on a local workspace: a pending comment on a removed line, ready to send to the agent." },
-  { name: "review-submit", title: "Finish the review", alt: "The Finish your review popover with a summary, two pending comments, and Approve selected." },
+  { name: "review-pr", title: "A pull request, in Orbit", alt: "Orbit's Review view on a GitHub pull request, with its files and inline review comments." },
   { name: "review-image", title: "Images, side by side", alt: "An image diff in the Review view: the old and new logo side by side, scaled up with their sizes." },
 ];
 
@@ -160,14 +105,14 @@ const chapterMedia = chapters.map((c) => {
     cropW: w,
   };
 });
-const areas = chapters.length;
+const areas = chapters.length; // grid cells, including areas made only of coming-soon features
 // The "See every feature" cell fills whatever the last row of the grid leaves empty.
 const ctaSpan = (cols: number) => cols - (areas % cols) || cols;
 const apps = 2;
 void PHONE;
 const stats = [
   { n: featureCount, label: "FEATURES" },
-  { n: areas, label: "AREAS" },
+  { n: areaCount, label: "AREAS" },
   { n: apps, label: "APPS (DESKTOP + IPHONE)" },
 ];
 const keyLabel = (k: string[]) => k.join(" ");
@@ -179,7 +124,7 @@ const keyLabel = (k: string[]) => k.join(" ");
     <!-- HERO -->
     <section id="hero" class="hero">
       <div class="container hero-copy">
-        <a href="#voice" class="hero-news" data-hero-in><Eyebrow>ORBIT {VERSION} · NEW: VOICE PREVIEW →</Eyebrow></a>
+        <a href="#review" class="hero-news" data-hero-in><Eyebrow>ORBIT {VERSION} · NEW: REVIEW IN ONE PLACE →</Eyebrow></a>
         <h1 class="display h1">
           <span data-hero-in class="line">Run a fleet of coding agents.</span>
           <span data-hero-in class="line mute">Ship from anywhere.</span>
@@ -244,6 +189,7 @@ const keyLabel = (k: string[]) => k.join(" ");
                     <button type="button" class="item-head" data-feat-head>
                       <span class="idx">{String(i + 1).padStart(2, "0")}</span>
                       <span class="title">{f.title}</span>
+                      {f.tag && <span class="tag" data-soon={f.tag === "Coming soon" ? "" : undefined}>{f.tag}</span>}
                     </button>
                     <div class="item-body">
                       <div class="item-inner">
@@ -276,10 +222,10 @@ const keyLabel = (k: string[]) => k.join(" ");
       </div>
     </section>
 
-    <!-- REVIEW: featured, ahead of its release -->
+    <!-- REVIEW: Preview in 0.4.0 -->
     <section id="review" class="section review">
       <div class="container mobile-head">
-        <Eyebrow>REVIEW · PREVIEW · COMING IN THE NEXT RELEASE</Eyebrow>
+        <Eyebrow>REVIEW · PREVIEW</Eyebrow>
         <h2 class="h2">Review every change. <span class="mute">Before it ships.</span></h2>
         <p class="lead">
           One queue for what your agents changed and the pull requests waiting on you. Read each change file by file, comment on any line, then send it back to the agent or submit it to GitHub, without opening a browser.
@@ -311,7 +257,7 @@ const keyLabel = (k: string[]) => k.join(" ");
         <p class="lead review-keys">
           <kbd class="kbd">Alt 6</kbd> opens it. <kbd class="kbd">[</kbd> <kbd class="kbd">]</kbd> move between files, <kbd class="kbd">V</kbd> marks one viewed, <kbd class="kbd">O</kbd> opens it in the Code view at the line you're reading.
         </p>
-        <div class="ctas"><Button href={GITHUB_URL} variant="secondary">Watch the repo for the release</Button></div>
+        <div class="ctas"><Button href={DOWNLOAD_URL} variant="secondary">Get Orbit {VERSION}</Button></div>
       </div>
     </section>
 
@@ -418,7 +364,7 @@ const keyLabel = (k: string[]) => k.join(" ");
         <Eyebrow>ORBIT MOBILE</Eyebrow>
         <h2 class="h2">Leave the desk. <span class="mute">Keep the fleet moving.</span></h2>
         <p class="lead">
-          Pair your iPhone by scanning a QR code in Orbit. Read transcripts, review diffs, answer questions, and stop a runaway turn, over your local network or Tailscale.
+          Pair your iPhone by scanning a QR code in Orbit. Read transcripts, review diffs, answer questions, and stop a runaway turn, over your local network.
         </p>
       </div>
       <div class="container-wide">
@@ -454,7 +400,7 @@ const keyLabel = (k: string[]) => k.join(" ");
             chapters.map((c, i) => (
               <li>
                 <a class="area" href={asset(`features/#ch-${c.id}`)}>
-                  <span class="area-top"><span class="area-n">{String(i + 1).padStart(2, "0")}</span><span class="area-count">{c.features.length}</span></span>
+                  <span class="area-top"><span class="area-n">{String(i + 1).padStart(2, "0")}</span><span class="area-count">{releasedIn(c) > 0 ? releasedIn(c) : "Soon"}</span></span>
                   <span class="area-title">{c.title}</span>
                   <span class="area-lead">{c.lead}</span>
                 </a>
@@ -752,6 +698,8 @@ const keyLabel = (k: string[]) => k.join(" ");
   .feat .dither-rule { margin-bottom: 24px; }
   .feat-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
   .feat h4 { margin: 0; font-size: 16px; font-weight: 540; letter-spacing: -0.01em; line-height: 1.35; color: var(--fg); }
+  .item-head .tag { align-self: center; flex: none; }
+  .tag[data-soon] { border-style: dashed; }
   .tag { font: 500 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--mute); border: 1px solid var(--line-strong); border-radius: 9999px; padding: 4px 8px; }
   .feat p { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--dim); text-wrap: pretty; }
   .feat-keys { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }

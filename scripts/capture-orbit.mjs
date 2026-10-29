@@ -23,6 +23,9 @@ page.setDefaultTimeout(6000);
 const want = (n) => only.size === 0 || only.has(n) || (n === "settings-keys-recorder" && only.has("settings-keys"));
 const shot = async (n) => {
   if (!want(n)) return;
+  // The demo goal card on Fix onboarding crash fills the chat; collapse it to its one-line bar.
+  const goal = page.locator('button:text-is("Goal") + button:text-is("Collapse")').first();
+  if (await goal.count()) { await goal.click().catch(() => {}); await w(300); }
   await w(800);
   await page.screenshot({ path: `media/raw/orbit-${scheme}-${n}.png` });
   console.log("saved", n);
@@ -46,6 +49,11 @@ await home();
 await shot("home");
 
 await clickText("Fix onboarding crash"); await shot("workspace");
+// The first message carries the two screenshots the user pasted: scroll the transcript to the top.
+if (want("workspace-top")) {
+  await page.evaluate(() => { for (const el of document.querySelectorAll("*")) if (el.scrollHeight > el.clientHeight + 40 && getComputedStyle(el).overflowY !== "visible" && el.querySelector("img")) el.scrollTop = 0; });
+  await shot("workspace-top");
+}
 const groups = page.getByText(/tool calls?/i);
 if (await groups.count()) { await groups.first().click(); await shot("workspace-tools"); await groups.first().click(); }
 
@@ -64,12 +72,13 @@ const meter = page.getByText(/170k \/ 200k/).first();
 if (await meter.count()) { await meter.click({ force: true }).catch(() => {}); await shot("context"); await esc(); }
 
 // Simplify panel: needs an idle agent, so run it on a finished workspace.
-await clickText("Refactor auth flow"); await w(600);
+await home(); await clickText("Refactor auth flow"); await w(600);
 if (await clickTitle("Find and apply simplifications in this workspace's changes")) {
   await shot("simplify-empty");
   const find = page.getByRole("button", { name: /Find simplifications/ }).first();
   if (await find.isEnabled().catch(() => false)) {
     await find.click(); await w(4000); await shot("simplify");
+    for (const i of [2, 3]) await page.getByRole("checkbox").nth(i).check().catch(() => {}); // also try the two medium-risk ones: one fails its checks and is reverted
     const apply = page.getByRole("button", { name: /Apply/ }).first();
     if (await apply.isEnabled().catch(() => false)) { await apply.click(); await w(5000); await shot("simplify-applying"); await w(9000); await shot("simplify-applied"); }
   }
@@ -113,17 +122,17 @@ if (want("code-watch") || want("code-diff") || want("code-ask") || want("code-te
   await w(Number(process.env.WATCH_DELAY ?? 700));
   if (want("code-watch")) { await page.screenshot({ path: `media/raw/orbit-${scheme}-code-watch.png` }); console.log("saved code-watch"); }
   // wait for the turn to finish, then open a per-turn diff from the Activity timeline
-  await page.getByText(/^Updated session handling/).first().waitFor({ timeout: 20000 });
+  await page.getByText(/^Fixed the signup crash/).first().waitFor({ timeout: 25000 });
   await w(1500);
-  await page.getByText("session.ts", { exact: true }).last().click(); await w(1000);
+  await page.getByText("submit.ts", { exact: true }).last().click(); await w(1000);
   await shot("code-diff");
   await page.getByRole("button", { name: "Back to file" }).click().catch(() => {}); await w(300);
   // Ask about selection
-  await page.locator(".cm-line", { hasText: "Keep the restored session" }).first().click();
+  await page.locator(".cm-line", { hasText: "Names like" }).first().click();
   await page.keyboard.press("Home"); await page.keyboard.press("Shift+ArrowDown"); await page.keyboard.press("Shift+ArrowDown");
   await page.keyboard.press("Control+i"); await w(500);
   const q = page.getByLabel("Question about selection");
-  if (await q.count()) await q.fill("Can this renew the token before it expires, instead of only leaving a note?");
+  if (await q.count()) await q.fill("Could the generated slug be checked against existing orgs so two signups never collide?");
   await shot("code-ask");
   await page.keyboard.press("Escape"); await w(300);
   // Terminal, then search
@@ -131,7 +140,7 @@ if (want("code-watch") || want("code-diff") || want("code-ask") || want("code-te
   await page.keyboard.type("ls", { delay: 20 }); await page.keyboard.press("Enter"); await w(800);
   await shot("code-terminal");
   await page.keyboard.press("Control+Shift+f"); await w(500);
-  await page.getByLabel("Search in files").fill("session"); await page.keyboard.press("Enter"); await w(1200);
+  await page.getByLabel("Search in files").fill("slug"); await page.keyboard.press("Enter"); await w(1200);
   await shot("code-search");
 }
 

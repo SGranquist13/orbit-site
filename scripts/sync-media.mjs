@@ -7,19 +7,22 @@ const fromManifest = [...manifest.matchAll(/(?:shot|phone):\s*"([^"]+\.png)"/g)]
 const pinned = [
   "orbit-dark-workspace.png", "orbit-dark-code-terminal.png", "orbit-dark-code-watch.png", "orbit-dark-inbox.png", "orbit-dark-teammates-chief.png",
   "orbit-dark-ship.png", "orbit-dark-routine-editor.png", "orbit-dark-simplify-applying.png",
+  "orbit-dark-fleet-board.png", "orbit-dark-goal-orchestrator.png", "orbit-dark-memory.png", "orbit-dark-approvals.png",
   "mobile-workspace.png", "mobile-inbox.png", "mobile-diff.png",
 ];
 const clipsOnly = process.argv.includes("--clips-only");
 const desktopOnly = process.argv.includes("--desktop-only");
 const voice = ["voice-setup", "settings-voice", "settings-voice-handsfree", "settings-voice-tidy"].map(n => `orbit-dark-${n}.png`);
 pinned.push(...voice);
-const review = ["review-local", "review-submit", "review-image"].map(n => `orbit-dark-${n}.png`);
+const review = ["review-local", "review-pr", "review-image"].map(n => `orbit-dark-${n}.png`);
 pinned.push(...review);
 const wanted = new Set([...fromManifest, ...pinned]);
 
 mkdirSync("src/assets/raw", { recursive: true });
 for (const f of readdirSync("src/assets/raw")) if (!clipsOnly && !desktopOnly && !wanted.has(f)) rmSync(`src/assets/raw/${f}`);
-for (const f of wanted) if (!clipsOnly && (!desktopOnly || f.startsWith("orbit-"))) copyFileSync(`media/raw/${f.replace("settings-shortcuts", "settings-keys")}`, `src/assets/raw/${f}`);
+// Planned shots that are not captured yet (see "Shot list" in FEATURES-AUDIT.md) are skipped; the site shows a placeholder.
+for (const f of wanted) if (!clipsOnly && (!desktopOnly || f.startsWith("orbit-")) && !existsSync(`media/raw/${f.replace("settings-shortcuts", "settings-keys")}`)) console.warn(`pending capture: ${f}`);
+for (const f of wanted) if (!clipsOnly && (!desktopOnly || f.startsWith("orbit-")) && existsSync(`media/raw/${f.replace("settings-shortcuts", "settings-keys")}`)) copyFileSync(`media/raw/${f.replace("settings-shortcuts", "settings-keys")}`, `src/assets/raw/${f}`);
 
 const videos = [
   ["orbit-tour-dark-trim.mp4", "orbit-tour-dark.mp4"],

@@ -50,8 +50,9 @@ function seedFleet() {
   // Marketing demo fleet: mirrors agentic_ide/src/lib/mock.ts so desktop and phone shots tell one story.
   const now = Date.now();
   const repos = [
-    { id: "r1", name: "superset", path: "C:/code/superset", baseBranch: "main" },
+    { id: "r1", name: "relay", path: "C:/code/relay", baseBranch: "main" },
     { id: "r2", name: "marketing-site", path: "C:/code/marketing-site", baseBranch: "main" },
+    { id: "r3", name: "api-gateway", path: "C:/code/api-gateway", baseBranch: "main" },
   ];
   const mk = (id, repoId, name, status, agent = "claude") => ({
     id, repoId, name, branch: `steven/${name.toLowerCase().replace(/\W+/g, "-")}`, path: `C:/Users/steven/.orbit/worktrees/${id}`,
@@ -60,12 +61,14 @@ function seedFleet() {
     seenSeq: 0, dismissedSeq: 0, profile: null, snoozedUntil: 0,
   });
   const workspaces = [
-    mk("w1", "r1", "Fix onboarding crash", "done"),
-    mk("w2", "r1", "Billing webhooks", "done", "codex"),
-    mk("w3", "r1", "Refactor auth flow", "idle"),
-    mk("w4", "r2", "Refresh homepage hero", "error"),
-    mk("w5", "r1", "Migrate billing schema", "idle"),
-    mk("w6", "r2", "Try new pricing layout", "idle", "codex"),
+    mk("w1", "r1", "Onboarding crash", "done"),
+    mk("w2", "r1", "Idempotent webhooks", "done", "codex"),
+    mk("w3", "r1", "Split auth module", "idle"),
+    mk("w4", "r2", "Homepage hero", "error"),
+    mk("w5", "r1", "Invoice tables", "idle"),
+    mk("w6", "r3", "Rate-limit API", "idle", "codex"),
+    mk("w7", "r1", "CSV billing export", "idle"),
+    mk("w8", "r1", "Dark mode flash", "idle", "codex"),
   ];
   const events = Object.fromEntries(workspaces.map((w) => [w.id, []]));
   const push = (wsId, event, ts = Date.now()) => {
@@ -89,12 +92,12 @@ function seedFleet() {
   };
   turn("w1", "The onboarding flow crashes when the org name is empty. Find the cause and fix it, with a test.", [
     { id: "t1", name: "Grep", input: { pattern: "createOrganization" }, output: "src/onboarding/submit.ts:42\nsrc/api/org.ts:17" },
-    { id: "t2", name: "Read", input: { file_path: "C:/code/superset/src/onboarding/submit.ts" }, output: "…" },
+    { id: "t2", name: "Read", input: { file_path: "C:/code/relay/src/onboarding/submit.ts" }, output: "…" },
     { id: "t3", name: "Bash", input: { command: "bun test src/onboarding" }, output: "1 fail: slugify(undefined)", isError: true },
     {
       id: "t4", name: "Edit",
       input: {
-        file_path: "C:/code/superset/src/onboarding/submit.ts",
+        file_path: "C:/code/relay/src/onboarding/submit.ts",
         old_string: `export async function submit(org: OrgInput) {
   const slug = slugify(org.name);
   return createOrganization({ ...org, slug });`,
@@ -108,7 +111,7 @@ function seedFleet() {
     {
       id: "t5", name: "Write",
       input: {
-        file_path: "C:/code/superset/src/onboarding/submit.test.ts",
+        file_path: "C:/code/relay/src/onboarding/submit.test.ts",
         content: `import { submit } from "./submit";
 
 test("rejects an empty org name", async () => {
@@ -124,14 +127,24 @@ test("falls back to a generated slug", async () => {
     },
     { id: "t6", name: "Bash", input: { command: "bun test src/onboarding" }, output: "6 pass, 0 fail" },
   ], "Found it: `slugify(org.name)` runs before validation, so an empty name reaches `name.trim()` as `undefined`.\n\n**Fix**\n- Validate the org name before slugging\n- Fall back to a generated slug\n- Added `submit.test.ts` covering the empty case\n\nAll 6 onboarding tests pass. Want me to open a PR?", 4 * 60_000);
-  turn("w3", "Refactor the auth flow", [
-    { id: "a1", name: "Glob", input: { pattern: "src/auth/**" }, output: "src/auth/session.ts\nsrc/auth/token.ts\nsrc/auth/cookie.ts" },
-    { id: "a2", name: "Read", input: { file_path: "C:/code/superset/src/auth/session.ts" }, output: "…" },
-  ], "I can split the auth flow into session and token modules.\n\nDo you want me to keep the legacy cookie path working during the migration?", 55 * 60_000, { ms: 38000, cost: 0.091 });
+  turn("w3", "Plan splitting the auth flow", [
+    { id: "a1", name: "Glob", input: { pattern: "src/auth/**" }, output: "src/auth/index.ts\nsrc/auth/cookies.ts\nsrc/auth/refresh.ts\nsrc/auth/middleware.ts" },
+    { id: "a2", name: "Read", input: { file_path: "C:/code/relay/src/auth/index.ts" }, output: "…" },
+  ], "The plan splits auth into session.ts and token.ts in four steps, each shippable on its own.\n\nShould the legacy cookie path keep working until v3, or can it go now?", 2 * 60_000, { ms: 96000, cost: 0.31 });
   turn("w2", "Make the Stripe webhook handler idempotent", [
-    { id: "b1", name: "Read", input: { file_path: "C:/code/superset/src/billing/webhook.ts" }, output: "…" },
-    { id: "b2", name: "Bash", input: { command: "bun test src/billing" }, output: "14 pass, 0 fail" },
-  ], "Webhook retries now back off exponentially and the handler is idempotent. Added tests for duplicate delivery.", 2 * 3600_000, { ms: 121000, cost: 0.31 });
+    { id: "b1", name: "Read", input: { file_path: "C:/code/relay/src/billing/webhook.ts" }, output: "…" },
+    { id: "b2", name: "Bash", input: { command: "bun test src/billing" }, output: "41 pass, 0 fail" },
+  ], "Retries now back off exponentially and duplicate deliveries are ignored by event id. 9 new tests pass.", 4 * 60_000, { ms: 212000, cost: null });
+  turn("w5", "Move invoices to the new tables, with a backfill", [
+    { id: "m1", name: "Write", input: { file_path: "C:/code/relay/src/db/migrations/0043_invoices.sql", content: "CREATE TABLE invoice_lines (\n  id bigserial PRIMARY KEY,\n  invoice_id bigint NOT NULL REFERENCES invoices(id),\n  amount_cents bigint NOT NULL\n);\n" } },
+    { id: "m2", name: "Bash", input: { command: "bun run db:migrate --dry-run" }, output: "0043_invoices.sql: 3 tables, 2 indexes" },
+  ], "Migration and a resumable backfill are written. Dry run is clean.", 20 * 60_000, { ms: 164000, cost: 0.42 });
+  turn("w7", "Export billing history as CSV", [
+    { id: "x1", name: "Bash", input: { command: "bun test src/billing/export" }, output: "6 pass, 0 fail" },
+  ], "PR #823 is approved and green. Ready to merge.", 48 * 60_000, { ms: 143000, cost: 0.27 });
+  turn("w8", "Fix #412: dark mode flashes white", [
+    { id: "d1", name: "Edit", input: { file_path: "C:/code/relay/index.html", old_string: "<head>", new_string: "<head>\n  <script>document.documentElement.dataset.theme = localStorage.theme ?? \"dark\"</script>" } },
+  ], "The theme now applies before first paint, so there's no white flash.", 7 * 60_000, { ms: 52000, cost: null });
   turn("w4", "Refresh the homepage hero", [
     { id: "h1", name: "Bash", input: { command: "bun run build" }, output: "error: cannot resolve ./hero.png", isError: true },
   ], null, 3 * 3600_000, { error: "Build failed: cannot resolve ./hero.png" });
@@ -193,6 +206,25 @@ export async function startMockOrbit(opts = {}) {
   await new Promise((res) => wss.once("listening", res));
   const actualPort = wss.address().port;
 
+  // Agent turns run on this clock. `manual: true` (video capture) only advances it via advance(ms),
+  // so a frame-stepped recorder sees the same timing every run.
+  let vnow = 0;
+  const queue = [];
+  const later = opts.manual ? (fn, ms) => { const h = { at: vnow + ms, fn }; queue.push(h); return h; } : setTimeout;
+  const cancelLater = opts.manual ? (h) => { const i = queue.indexOf(h); if (i >= 0) queue.splice(i, 1); } : clearTimeout;
+  const advance = (ms) => {
+    const end = vnow + ms;
+    for (;;) {
+      queue.sort((a, b) => a.at - b.at);
+      if (!queue.length || queue[0].at > end) break;
+      const h = queue.shift(); vnow = h.at; h.fn();
+    }
+    vnow = end;
+  };
+
+  // A long turn on Rate-limit API, so the phone has something running to watch and stop.
+  later(() => runTurn("w6", "Rate-limit the public API per key. 600 a minute, burst of 100."), 0);
+
   const pairingUri = (hosts = opts.hosts ?? lanHosts()) =>
     `orbit://pair?v=1&pk=${URLSAFE(kp.publicKey)}&code=${current.code}&port=${actualPort}&hosts=${hosts.join(",")}&name=${encodeURIComponent(name)}`;
 
@@ -225,10 +257,21 @@ export async function startMockOrbit(opts = {}) {
       at(() => emitEvent(wsId, { type: "toolCall", id, name, input }));
       at(() => emitEvent(wsId, { type: "toolResult", id, output, isError: false }));
     };
-    say(["Pushing ", "the branch ", "and opening ", "a draft PR."]);
-    tool("Bash", { command: "git push -u origin HEAD" }, "branch steven/fix-onboarding-crash set up to track origin\n");
-    tool("Bash", { command: "gh pr create --draft --fill" }, "https://github.com/acme/superset/pull/827\n");
-    say(["Opened draft ", "**#827** ", "fix(onboarding): ", "handle empty org name. ", "CI is running. ", "I'll ping you ", "if a check fails."]);
+    if (wsId === "w3") {
+      say(["Keeping ", "the cookie path ", "until v3. ", "Starting step 1: ", "extracting ", "`token.ts`."]);
+      tool("Write", { file_path: "C:/code/relay/src/auth/token.ts", content: "export function verifyToken(raw: string) {\n  // moved from auth/index.ts, unchanged\n}\n" }, "ok");
+      tool("Bash", { command: "bun test src/auth" }, "22 pass, 0 fail\n");
+      say(["Step 1 is done ", "and all 22 auth tests pass. ", "Moving on to ", "`session.ts`."]);
+    } else if (wsId === "w6") {
+      // Long on purpose: the phone watches this turn and stops it.
+      say(["Adding ", "a token bucket ", "per API key."]);
+      for (let k = 0; k < 200; k++) tool("Bash", { command: `go test ./middleware/... -run TestBurst/${k}` }, "ok\n");
+    } else {
+      say(["Pushing ", "the branch ", "and opening ", "a draft PR."]);
+      tool("Bash", { command: "git push -u origin HEAD" }, "branch steven/onboarding-crash set up to track origin\n");
+      tool("Bash", { command: "gh pr create --draft --fill" }, "https://github.com/acme/relay/pull/827\n");
+      say(["Opened draft ", "**#827** ", "fix(onboarding): ", "handle empty org name. ", "CI is running. ", "I'll ping you ", "if a check fails."]);
+    }
     at(() => emitEvent(wsId, { type: "usage", inputTokens: 1200, outputTokens: 340, cacheReadTokens: 9000, cacheWriteTokens: 0, contextTokens: 10540, contextWindow: 200000, costUsd: 0.012, model: "mock" }));
     at(() => { emitEvent(wsId, { type: "turnCompleted", durationMs: steps.length * stepMs, costUsd: 0.012, isError: false, error: null }); setStatus(wsId, "done"); });
     let i = 0;
@@ -236,8 +279,8 @@ export async function startMockOrbit(opts = {}) {
     const tick = () => {
       if (i >= steps.length) { timers.delete(wsId); return; }
       steps[i++]();
-      timer = setTimeout(tick, i <= 2 ? 50 : stepMs);
-      timers.set(wsId, { cancel: () => clearTimeout(timer) });
+      timer = later(tick, i <= 2 ? 50 : stepMs);
+      timers.set(wsId, { cancel: () => cancelLater(timer) });
     };
     tick();
   }
@@ -380,6 +423,7 @@ export async function startMockOrbit(opts = {}) {
       wss.close(() => res());
     }),
     expireCode() { if (current) current.expires = Date.now() - 1; },
+    advance,
   };
 }
 

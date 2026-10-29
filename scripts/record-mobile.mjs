@@ -20,7 +20,7 @@ cdp.on("Page.screencastFrame", async (f) => {
 });
 await cdp.send("Page.startScreencast", { format: "jpeg", quality: 92, maxWidth: 1170, maxHeight: 2532 });
 await w(1500);
-await page.getByText("Fix onboarding crash").first().tap(); await w(2200);
+await page.getByText("Onboarding crash").first().tap(); await w(2200);
 const box = page.locator("textarea").last();
 await box.tap(); await w(300); await box.pressSequentially("Ship it", { delay: 120 }); await w(500);
 await page.keyboard.press("Enter"); await w(400);
